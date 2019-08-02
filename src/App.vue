@@ -1,11 +1,11 @@
-<template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+<template lang="pug">
+  #app
+    #nav.nav
+      .navbar-menu
+        .navbar-start
+          router-link.navbar-item(to="/") Home
+          router-link.navbar-item(to="/about") About
+    router-view
 </template>
 
 <style lang="less">
@@ -14,8 +14,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
 }
+
 #nav {
   padding: 30px;
   a {
