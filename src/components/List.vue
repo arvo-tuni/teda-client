@@ -34,18 +34,18 @@ export default Vue.extend({
     prompt: {
       type: String,
       default: 'Select an item',
-      require: false,
+      required: false,
     },
 
     items: {
       type: Array,
-      require: true,
+      required: true,
     },
 
     selected: {
       type: String,
       default: '',
-      require: false,
+      required: false,
     },
   },
 

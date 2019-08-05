@@ -1,13 +1,19 @@
 <template lang="pug">
-  .home
+  #home.container
     list(prompt="Select a test" :items="tests" @selected="load")
 
-    message(type="error" :message="errorMessage")
-    message(type="success" :message="successMessage")
+    .fixed-footer
+      message(type="error" :message="errorMessage")
+      message(type="success" :message="successMessage"  auto-hide=true)
 
-    visualizations(v-show="true || !!testName" @tab="setVisualization")
-      fixations-plot(v-if="isVisualizationSelected( visualizations.fixplot )")
-      statistics(v-if="isVisualizationSelected( visualizations.statistics )")
+    .tile
+      article.tile.is-child.is-2
+        trials(v-if="testName" @selected="selectTrial")
+
+      article.tile.is-child
+        visualizations(v-show="!!trialID" @tab="selectVisualization")
+          fixations-plot(v-if="isVisualizationSelected( visualizations.fixplot )" :trial="trialID")
+          statistics(v-if="isVisualizationSelected( visualizations.statistics )" :trial="trialID")
 
     waiting(v-show="isLoading" is-modal=true)
 
@@ -19,6 +25,7 @@ import Vue from 'vue';
 import List from '@/components/List.vue';
 import Message from '@/components/Message.vue';
 import Waiting from '@/components/Waiting.vue';
+import Trials from '@/components/Trials.vue';
 import Visualizations from '@/components/Visuzalitions.vue';
 import FixationsPlot from '@/components/FixationsPlot.vue';
 import Statistics from '@/components/Statistics.vue';
@@ -35,6 +42,7 @@ interface Data {
   isLoading: boolean;
   visualizations: any;
   visualizationName: string;
+  trialID: string;
 }
 
 export default Vue.extend({
@@ -44,6 +52,7 @@ export default Vue.extend({
     List,
     Message,
     Waiting,
+    Trials,
     Visualizations,
     FixationsPlot,
     Statistics,
@@ -58,6 +67,7 @@ export default Vue.extend({
       isLoading: false,
       visualizations: VISUALIZATIONS,
       visualizationName: '',
+      trialID: '',
     };
     return r;
   },
@@ -104,9 +114,13 @@ export default Vue.extend({
       return this.visualizationName === name;
     },
 
-    setVisualization( name: string ) {
+    selectVisualization( name: string ) {
       this.visualizationName = name;
-    }
+    },
+
+    selectTrial( id: string ) {
+      this.trialID = id;
+    },
   },
 
   mounted() {
@@ -120,3 +134,15 @@ export default Vue.extend({
   },
 });
 </script>
+
+<style scoped lang="less">
+#home {
+  padding: 1em 0;
+}
+.fixed-footer {
+  position: fixed;
+  bottom: 0;
+  left: 5vw;
+  width: 90vw;
+}
+</style>

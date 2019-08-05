@@ -20,6 +20,13 @@ export default Vue.extend({
     return r;
   },
 
+  props: {
+    trial: {
+      type: String,
+      required: true,
+    },
+  },
+
   computed: {
   },
 
@@ -27,7 +34,6 @@ export default Vue.extend({
   },
 
   created() {
-    Data
   }
 });
 

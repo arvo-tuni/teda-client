@@ -8,8 +8,11 @@
 <script lang="ts">
 import Vue from 'vue';
 
+const AUTO_HIDE_INTERVAL = 3000; // ms
+
 interface Data {
   enabled: boolean;
+  timer: number;
 }
 
 export default Vue.extend({
@@ -18,18 +21,25 @@ export default Vue.extend({
   props: {
     type: {
       type: String,
-      require: true,
+      required: true,
     },
 
     message: {
       type: String,
-      require: true,
+      required: true,
+    },
+
+    autoHide: {
+      type: Boolean,
+      default: false,
+      required: false,
     },
   },
 
   data() {
     const r: Data = {
       enabled: !!this.message,
+      timer: 0,
     };
     return r;
   },
@@ -52,6 +62,17 @@ export default Vue.extend({
   watch: {
     message( val ) {
       this.enabled = !!val;
+
+      if (this.autoHide) {
+        if (this.timer) {
+          clearTimeout( this.timer );
+          this.timer = 0;
+        }
+
+        this.timer = setInterval( () => {
+          this.enabled = false;
+        }, AUTO_HIDE_INTERVAL );
+      }
     },
   },
 });
