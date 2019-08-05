@@ -1,40 +1,48 @@
 <template lang="pug">
-  #list-of-test
+  #list
     .dropdown(:class="{ 'is-active': isListShown }")
       .dropdown-trigger(@click.stop="")
         button.button(aria-haspopup="true" aria-controls="dropdown-menu" @click="toggleList()")
-          span {{ testName }}
+          span {{ item }}
           span.icon.is-small
             i.fas.fa-angle-down(aria-hidden="true")
       .dropdown-menu(role="menu")
         .dropdown-content
           a.dropdown-item(
-            v-for="test in tests" 
+            v-for="item in items" 
             href="#"
-            :class="{ 'is-active': isSelected( test ) }"
-            @click.stop="loadTest( test )"
-          ) {{ test }}
+            :class="{ 'is-active': isSelected( item ) }"
+            @click.stop="select( item )"
+          ) {{ item }}
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 
-import * as Data from '@/core/data';
-
 interface Data {
-  tests: string[];
-  selectedTest: string;
+  selectedItem: string;
   isListShown: boolean;
 }
 
 /// Emits:
-///   selected( testName ) 
+///   selected( item ) 
 
 export default Vue.extend({
-  name: 'ListOfTests',
+  name: 'list',
 
   props: {
-    test: {
+    prompt: {
+      type: String,
+      default: 'Select an item',
+      require: false,
+    },
+
+    items: {
+      type: Array,
+      require: true,
+    },
+
+    selected: {
       type: String,
       default: '',
       require: false,
@@ -43,27 +51,24 @@ export default Vue.extend({
 
   data() {
     const r: Data = {
-      tests: [],
-
-      selectedTest: this.test,
-
+      selectedItem: this.selected,
       isListShown: false,
     };
     return r;
   },
 
   computed: {
-    testName(): string {
-      return this.selectedTest ? this.selectedTest : 'Select a test';
+    item(): string {
+      return this.selectedItem ? this.selectedItem : this.prompt;
     },
   },
 
   methods: {
-    loadTest( test: string ) {
+    select( item: string ) {
       this.hideList();
-      this.selectedTest = test;
+      this.selectedItem = item;
 
-      this.$emit( 'selected', this.selectedTest );
+      this.$emit( 'selected', this.selectedItem );
     },
 
     toggleList() {
@@ -74,19 +79,13 @@ export default Vue.extend({
       this.isListShown = false;
     },
 
-    isSelected( test: string ): boolean {
-      return this.selectedTest === test;
+    isSelected( item: string ): boolean {
+      return this.selectedItem === item;
     },
   },
 
   created() {
     window.document.addEventListener( 'click', _ => this.hideList() );
-  },
-
-  mounted() {
-    Data.getTests( (tests: string[]) => {
-      this.tests = tests;
-    });
   },
 
   destroyed() {

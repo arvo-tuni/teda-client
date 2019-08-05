@@ -8,6 +8,10 @@
 <script lang="ts">
 import Vue from 'vue';
 
+interface Data {
+  enabled: boolean;
+}
+
 export default Vue.extend({
   name: 'message',
 
@@ -24,9 +28,10 @@ export default Vue.extend({
   },
 
   data() {
-    return {
+    const r: Data = {
       enabled: !!this.message,
     };
+    return r;
   },
 
   computed: {

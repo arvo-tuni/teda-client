@@ -1,6 +1,6 @@
 <template lang="pug">
   #app
-    #nav.nav
+    nav.nav
       .navbar-menu
         .navbar-start
           router-link.navbar-item(to="/") Home
@@ -16,7 +16,7 @@
   text-align: center;
 }
 
-#nav {
+.nav {
   padding: 30px;
   a {
     font-weight: bold;

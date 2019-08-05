@@ -1,4 +1,4 @@
-export class TestMeta {
+/*export class TestMeta {
   
   _id: string;
   participant: string;
@@ -11,25 +11,18 @@ export class TestMeta {
     this.timestamp = new Date();
     this.resultWord = '';
   }
+}*/
+export class RequestResult {
+  message: string;
+
+  constructor( msg: string ) {
+    this.message = msg;
+  }
 }
 
-export function getTests( cb: CallableFunction ) {
-  fetch( 'http://localhost:3000/tests', {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'same-origin',
-  })
-  .then( res => {
-    return res.json();
-  })
-  .then( (tests: TestMeta[]) => {
-    cb( tests );
-  });
-}
-
-export function load( name: string, cb: CallableFunction ) {
-  fetch( `http://localhost:3000/test/${name}`, {
-    method: 'PUT',
+function request( method: string, path: string ) {
+  return fetch( `http://localhost:3000/${path}`, {
+    method,
     mode: 'cors',
     credentials: 'same-origin',
   })
@@ -38,10 +31,27 @@ export function load( name: string, cb: CallableFunction ) {
       return res.json();
     }
     else {
-      cb({message: 'not found'});
+      return Promise.reject( new RequestResult( `Request error for "${path}": ${res.statusText}` ) );
     }
-  })
-  .then( res => {
-    cb( res );
   });
+}
+
+function get( path: string ) {
+  return request( 'GET', path );
+}
+
+function put( path: string ) {
+  return request( 'PUT', path );
+}
+
+export function load( name: string ) {
+  return put( `test/${name}` );
+}
+
+export function tests() {
+  return get( 'tests' );
+}
+
+export function trials() {
+  return get( 'trials' );
 }
