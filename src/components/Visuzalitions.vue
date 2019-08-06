@@ -18,7 +18,7 @@ import Vue from 'vue';
 
 import VISUALIZATIONS from '@/core/visualizations';
 
-interface Data {
+interface CompData {
   tabs: any;
 }
 
@@ -28,10 +28,9 @@ export default Vue.extend({
   name: 'viualizations',
 
   data() {
-    const r: Data = {
+    return {
       tabs: VISUALIZATIONS,
-    };
-    return r;
+    } as CompData;
   },
 
   computed: {

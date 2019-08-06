@@ -1,6 +1,6 @@
 <template lang="pug">
   #fixplot
-    button.button fixplot
+    p not implemented
 </template>
 
 <script lang="ts">
@@ -8,16 +8,15 @@ import Vue from 'vue';
 
 import * as Data from '@/core/data';
 
-interface Data {
+interface CompData {
 }
 
 export default Vue.extend({
   name: 'fixations-plot',
 
   data() {
-    const r: Data = {
-    };
-    return r;
+    return {
+    } as CompData;
   },
 
   props: {

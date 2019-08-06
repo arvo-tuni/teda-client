@@ -18,7 +18,7 @@
 <script lang="ts">
 import Vue from 'vue';
 
-interface Data {
+interface CompData {
   selectedItem: string;
   isListShown: boolean;
 }
@@ -49,11 +49,10 @@ export default Vue.extend({
   },
 
   data() {
-    const r: Data = {
+    return {
       selectedItem: this.selected,
       isListShown: false,
-    };
-    return r;
+    } as CompData;
   },
 
   computed: {

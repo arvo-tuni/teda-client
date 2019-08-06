@@ -62,10 +62,9 @@ import * as Defs from '@/core/decl';
 import * as WebLog from '../../../test-data-server/js/web/log.js';
 import { twoDigits, treeDigits, msToTime, toDate} from '@/core/format';
 
-interface Data {
+interface CompData {
   properties: Defs.TrialMetaExt;
   hits: Array<any>;
-  marks: number[];
   errorMessage: string;
   chart: any;
 }
@@ -79,14 +78,12 @@ export default Vue.extend({
   },
 
   data() {
-    const r: Data = {
-      properties: {},
+    return {
+      properties: new Defs.TrialMetaExt(),
       hits: [],
-      marks: [],
       errorMessage: '',
       chart: null,
-    };
-    return r;
+    } as CompData;
   },
 
   props: {
@@ -124,6 +121,8 @@ export default Vue.extend({
     },
 
     loadData() {
+      this.errorMessage = '';
+      
       Data.meta( this.trial )
         .then( (metaExt: Defs.TrialMetaExt) => {
           this.properties = metaExt;
@@ -132,11 +131,6 @@ export default Vue.extend({
         .then( (hits: Array<any>) => {
           this.hits = hits;
           this.createHitsGraph( this.$refs.hits as Element );
-        //   return Data.marks( this.trial );
-        // })
-        // .then( (marks: Array<any>) => {
-        //   this.marks = marks;
-        //   console.log(this.marks);
         })
         .catch( (error: Error) => {
           this.errorMessage = 'Cannot retrieve data: ' + (error ? error.message : 'unknown error') + '. Close this message to try again';
@@ -144,7 +138,8 @@ export default Vue.extend({
     },
 
     createHitsGraph( el: Element ) {
-      const datasets = [];
+      const datasets: {data: number[], label: string, backgroundColor: string}[] = [];
+
       if (this.hits[0].wrong !== undefined) {
         datasets.push({
           label: 'wrong',
@@ -161,6 +156,7 @@ export default Vue.extend({
         datasets.push({
           label: 'total',
           data: this.hits,
+          backgroundColor: 'rgba(0, 0, 0, 0.3)',
         });
       }
 
@@ -185,13 +181,6 @@ export default Vue.extend({
 
   created() {
     this.loadData();
-
-    // hitsPerTenth
-    // clickables
-    // marked
-    // events
-    // headData
-    // markedWrong
   },
 });
 

@@ -45,14 +45,20 @@ export function hits( id: string ): Promise<number[] | WebLog.WrongAndCorrect[]>
   return get( `trial/${id}/hits` );
 }
 
-export function marks( id: string ): Promise<number[]> {
+export function marksCorrect( id: string ): Promise<number[]> {
   return get( `trial/${id}/marks` );
+}
+
+export function marksWrong( id: string ): Promise<number[]> {
+  return get( `trial/${id}/errors` );
+}
+
+export function targets( id: string ): Promise<WebLog.Clickable[]> {
+  return get( `trial/${id}/targets` );
 }
 
 /*
 '/trial/:id': 'full trial data (WARNING! it may take tens of Mb to load)',
-'/trial/:id/targets': 'the trial targets',
-'/trial/:id/errors': 'the trial erroneously marked targets',
 '/trial/:id/events': 'the trial mouse click and scrolls',
 '/trial/:id/head': 'the trial head data (WARNING! it may take tens of Mb to load)',
 '/trial/:id/gaze': 'the trial Tobii recording meta data (WARNING! it may take tens of Mb to load)',

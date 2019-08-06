@@ -23,7 +23,7 @@ import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
 import { toDate } from '@/core/format';
 
-interface Data {
+interface CompData {
   trials: Defs.TrialMeta[];
   selected: Defs.TrialMeta | null;
 }
@@ -34,11 +34,10 @@ export default Vue.extend({
   name: 'trials',
 
   data() {
-    const r: Data = {
+    return {
       trials: [],
       selected: null,
-    };
-    return r;
+    } as CompData;
   },
 
   methods: {

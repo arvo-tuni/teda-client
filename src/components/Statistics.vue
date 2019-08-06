@@ -1,21 +1,20 @@
 <template lang="pug">
   #statistics
-    button.button statistics
+    p not implemented
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
 
-interface Data {
+interface CompData {
 }
 
 export default Vue.extend({
   name: 'statistics',
 
   data() {
-    const r: Data = {
-    };
-    return r;
+    return {
+    } as CompData;
   },
 
   computed: {

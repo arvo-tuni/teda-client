@@ -15,6 +15,7 @@
       article.tile.is-child
         visualizations(v-show="hasTrialID" @tab="selectVisualization")
           meta-ext(v-if="isVisualizationSelected( visualizations.meta )" :trial="trialID")
+          stimuli(v-if="isVisualizationSelected( visualizations.stimuli )" :trial="trialID")
           fixations-plot(v-if="isVisualizationSelected( visualizations.fixplot )" :trial="trialID")
           statistics(v-if="isVisualizationSelected( visualizations.statistics )" :trial="trialID")
 
@@ -31,6 +32,7 @@ import Waiting from '@/components/Waiting.vue';
 import Trials from '@/components/Trials.vue';
 import Visualizations from '@/components/Visuzalitions.vue';
 import MetaExt from '@/components/MetaExt.vue';
+import Stimuli from '@/components/Stimuli.vue';
 import FixationsPlot from '@/components/FixationsPlot.vue';
 import Statistics from '@/components/Statistics.vue';
 
@@ -58,6 +60,7 @@ export default Vue.extend({
     Trials,
     Visualizations,
     MetaExt,
+    Stimuli,
     FixationsPlot,
     Statistics,
   },
@@ -100,7 +103,9 @@ export default Vue.extend({
         return;
       }
 
-      this.selectTrial( '' );
+      this.$store.commit( 'visualization', '' );
+      this.$store.commit( 'trial', '' );
+
       this.testName = '';
       this.successMessage = '';
       this.errorMessage = '';
@@ -135,8 +140,16 @@ export default Vue.extend({
     },
 
     selectTrial( id: string ) {
+      const restoreVisualizationName = this.$store.state.visualizationName;
+
       this.$store.commit( 'visualization', '' );
       this.$store.commit( 'trial', id );
+
+      if (!!restoreVisualizationName) {
+        this.$nextTick().then( () => {
+          this.$store.commit( 'visualization', restoreVisualizationName );
+        });
+      }
     },
   },
 

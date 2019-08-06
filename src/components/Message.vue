@@ -10,7 +10,7 @@ import Vue from 'vue';
 
 const AUTO_HIDE_INTERVAL = 3000; // ms
 
-interface Data {
+interface CompData {
   enabled: boolean;
   timer: number;
 }
@@ -39,11 +39,10 @@ export default Vue.extend({
   },
 
   data() {
-    const r: Data = {
+    return {
       enabled: !!this.message,
       timer: 0,
-    };
-    return r;
+    } as CompData;
   },
 
   computed: {
