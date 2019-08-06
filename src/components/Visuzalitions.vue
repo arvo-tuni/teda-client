@@ -20,7 +20,6 @@ import VISUALIZATIONS from '@/core/visualizations';
 
 interface Data {
   tabs: any;
-  activeTab: string;
 }
 
 /// Emits:
@@ -31,21 +30,22 @@ export default Vue.extend({
   data() {
     const r: Data = {
       tabs: VISUALIZATIONS,
-      activeTab: '',
     };
     return r;
   },
 
   computed: {
+    activeTab(): string {
+      return this.$store.state.visualizationName;
+    }
   },
 
   methods: {
     isTabActive( tab: string ): boolean {
-      return tab === this.activeTab;
+      return tab === this.$store.state.visualizationName;
     },
 
     setTab( tab: string ) {
-      this.activeTab = tab;
       this.$emit( 'tab', tab );
     },
   },

@@ -1,27 +1,6 @@
-export class TrialMeta {
-  
-  _id: string;
-  participant: string;
-  timestamp: Date;
-  type: string;
+import * as Defs from '@/core/decl';
 
-  constructor() {
-    this._id = '';
-    this.participant = ''; 
-    this.timestamp = new Date();
-    this.type = '';
-  }
-}
-
-export class RequestResult {
-  message: string;
-
-  constructor( msg: string ) {
-    this.message = msg;
-  }
-}
-
-function request( method: string, path: string ) {
+function request( method: string, path: string ): Promise<any> {
   return fetch( `http://localhost:3000/${path}`, {
     method,
     mode: 'cors',
@@ -32,34 +11,37 @@ function request( method: string, path: string ) {
       return res.json();
     }
     else {
-      return Promise.reject( new RequestResult( `Request error for "${path}": ${res.statusText}` ) );
+      return Promise.reject( new Error( `Request error for "${path}": ${res.statusText}` ) );
     }
   });
 }
 
-function get( path: string ) {
+function get( path: string ): Promise<any> {
   return request( 'GET', path );
 }
 
-function put( path: string ) {
+function put( path: string ): Promise<any> {
   return request( 'PUT', path );
 }
 
-export function load( name: string ) {
+export function load( name: string ): Promise<Error> {
   return put( `test/${name}` );
 }
 
-export function tests() {
+export function tests(): Promise<string[]> {
   return get( 'tests' );
 }
 
-export function trials() {
+export function trials(): Promise<Defs.TrialMeta[]> {
   return get( 'trials' );
+}
+
+export function meta( id: string ): Promise<Defs.TrialMetaExt> {
+  return get( `trial/${id}/meta` );
 }
 
 /*
 '/trial/:id': 'full trial data (WARNING! it may take tens of Mb to load)',
-'/trial/:id/meta': 'the trial extended meta data',
 '/trial/:id/hits': 'the trial selections per decimale',
 '/trial/:id/targets': 'the trial targets',
 '/trial/:id/marks': 'the trial marked targets',

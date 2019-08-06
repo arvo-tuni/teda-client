@@ -1,6 +1,5 @@
 <template lang="pug">
-  #list
-    .dropdown(:class="{ 'is-active': isListShown }")
+  #list.dropdown(:class="{ 'is-active': isListShown }")
       .dropdown-trigger(@click.stop="")
         button.button(aria-haspopup="true" aria-controls="dropdown-menu" @click="toggleList()")
           span {{ item }}

@@ -9,10 +9,10 @@
     )
       .panel-icon
         i.fas.fa-book(aria-hidden="true")
-      .trial
+      .has-text-left
         .trial-info.is-flex
-          span.name {{ trial.participant }}
-          span.type {{ trial.type }}
+          span {{ trial.participant }}
+          span.has-text-weight-bold {{ trial.type }}
         .timestamp {{ formatDate( trial.timestamp ) }}
 </template>
 
@@ -20,10 +20,12 @@
 import Vue from 'vue';
 
 import * as Data from '@/core/data';
+import * as Defs from '@/core/decl';
+import { toDate } from '@/core/format';
 
 interface Data {
-  trials: Data.TrialMeta[];
-  selected: Data.TrialMeta | null;
+  trials: Defs.TrialMeta[];
+  selected: Defs.TrialMeta | null;
 }
 
 /// Emits:
@@ -40,30 +42,15 @@ export default Vue.extend({
   },
 
   methods: {
-    isSelected( trial: Data.TrialMeta ) {
+    isSelected( trial: Defs.TrialMeta ) {
       return this.selected === trial;
     },
 
     formatDate( value: string ) {
-      const d = new Date( value );
-      const yyyymmdd = [
-        this.twoDigits(d.getDate()),
-        this.twoDigits(d.getMonth()+1),
-        d.getFullYear(),
-      ];
-      const hhmmss = [
-        this.twoDigits(d.getHours()),
-        this.twoDigits(d.getMinutes()),
-        this.twoDigits(d.getSeconds()),
-      ]
-      return `${yyyymmdd.join('.')} ${hhmmss.join(':')}`;
+      return toDate( value );
     },
 
-    twoDigits( value: number ): string {
-      return value < 10 ? `0${value}` : value.toString();
-    },
-
-    select( trial: Data.TrialMeta ) {
+    select( trial: Defs.TrialMeta ) {
       this.selected = trial;
       this.$emit( 'selected', trial._id );
     },
@@ -71,7 +58,7 @@ export default Vue.extend({
 
   created() {
     Data.trials()
-      .then( (trials: Data.TrialMeta[]) => {
+      .then( (trials: Defs.TrialMeta[]) => {
         this.trials = trials;
       });
   }
@@ -82,9 +69,6 @@ export default Vue.extend({
 <style scoped lang="less">
 #trials {
   margin: 1em auto;
-}
-.trial {
-  text-align: left;
 }
 .trial-info {
   span {
@@ -97,8 +81,5 @@ export default Vue.extend({
 .timestamp {
   font-style: italic;
   font-size: smaller;
-}
-.type {
-  font-weight: bold;
 }
 </style>

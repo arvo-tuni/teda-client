@@ -15,6 +15,8 @@ interface Data {
   timer: number;
 }
 
+/// Emits:
+///   closed() - closed manually
 export default Vue.extend({
   name: 'message',
 
@@ -56,7 +58,16 @@ export default Vue.extend({
   methods: {
     close() {
       this.enabled = false;
-    }
+
+      if (this.timer) {
+        clearTimeout( this.timer );
+        this.timer = 0;
+      }
+
+      if (!this.autoHide) {
+        this.$emit( 'closed' );
+      }
+    },
   },
 
   watch: {
@@ -71,6 +82,7 @@ export default Vue.extend({
 
         this.timer = setInterval( () => {
           this.enabled = false;
+          this.timer = 0;
         }, AUTO_HIDE_INTERVAL );
       }
     },

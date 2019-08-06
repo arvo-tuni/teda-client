@@ -1,6 +1,8 @@
 <template lang="pug">
   #home.container
-    list(prompt="Select a test" :items="tests" @selected="load")
+    template
+      list(v-if="tests.length" prompt="Select a test" :items="tests" @selected="load")
+      waiting(v-else is-modal=false is-bar=false)
 
     .fixed-footer
       message(type="error" :message="errorMessage")
@@ -11,11 +13,12 @@
         trials(v-if="testName" @selected="selectTrial")
 
       article.tile.is-child
-        visualizations(v-show="!!trialID" @tab="selectVisualization")
+        visualizations(v-show="hasTrialID" @tab="selectVisualization")
+          meta-ext(v-if="isVisualizationSelected( visualizations.meta )" :trial="trialID")
           fixations-plot(v-if="isVisualizationSelected( visualizations.fixplot )" :trial="trialID")
           statistics(v-if="isVisualizationSelected( visualizations.statistics )" :trial="trialID")
 
-    waiting(v-show="isLoading" is-modal=true)
+    waiting(v-show="isLoading" is-modal=true is-bar=true)
 
 </template>
 
@@ -27,10 +30,12 @@ import Message from '@/components/Message.vue';
 import Waiting from '@/components/Waiting.vue';
 import Trials from '@/components/Trials.vue';
 import Visualizations from '@/components/Visuzalitions.vue';
+import MetaExt from '@/components/MetaExt.vue';
 import FixationsPlot from '@/components/FixationsPlot.vue';
 import Statistics from '@/components/Statistics.vue';
 
 import * as Data from '@/core/data';
+import * as Defs from '@/core/decl';
 import VISUALIZATIONS from '@/core/visualizations';
 
 
@@ -41,8 +46,6 @@ interface Data {
   successMessage: string;
   isLoading: boolean;
   visualizations: any;
-  visualizationName: string;
-  trialID: string;
 }
 
 export default Vue.extend({
@@ -54,6 +57,7 @@ export default Vue.extend({
     Waiting,
     Trials,
     Visualizations,
+    MetaExt,
     FixationsPlot,
     Statistics,
   },
@@ -66,14 +70,22 @@ export default Vue.extend({
       successMessage: '',
       isLoading: false,
       visualizations: VISUALIZATIONS,
-      visualizationName: '',
-      trialID: '',
     };
     return r;
   },
 
+  computed: {
+    trialID(): string {
+      return this.$store.state.trialID;
+    },
+
+    hasTrialID(): boolean {
+      return !!this.$store.state.trialID;
+    },
+  },
+
   methods: {
-    showError( err: Data.RequestResult | any ) {
+    showError( err: Error ) {
       if (!err) {
         this.errorMessage = 'unknown error';
       }
@@ -91,7 +103,7 @@ export default Vue.extend({
         this.isLoading = true;
 
         Data.load( testName )
-          .then( (respond: Data.RequestResult) => {
+          .then( (respond: Error) => {
             if (respond.message === 'OK') {
               this.successMessage = 'Success';
               this.testName = testName;
@@ -101,7 +113,7 @@ export default Vue.extend({
               return Promise.reject();
             }
           })
-          .catch( (err: Data.RequestResult | any) => {
+          .catch( (err: Error) => {
             this.showError( err );
           })
           .finally( () => {
@@ -111,15 +123,16 @@ export default Vue.extend({
     },
 
     isVisualizationSelected( name: string ): boolean {
-      return this.visualizationName === name;
+      return this.$store.state.visualizationName === name;
     },
 
     selectVisualization( name: string ) {
-      this.visualizationName = name;
+      this.$store.commit( 'visualization', name );
     },
 
     selectTrial( id: string ) {
-      this.trialID = id;
+      this.$store.commit( 'visualization', '' );
+      this.$store.commit( 'trial', id );
     },
   },
 
@@ -128,7 +141,7 @@ export default Vue.extend({
       .then( (tests: string[]) => {
         this.tests = tests;
       })
-      .catch( (err: Data.RequestResult | any) => {
+      .catch( (err: Error) => {
         this.showError( err );
       });
   },

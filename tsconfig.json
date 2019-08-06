@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "target": "esnext",
     "module": "esnext",
     "strict": true,
@@ -16,7 +17,10 @@
     "paths": {
       "@/*": [
         "src/*"
-      ]
+      ],
+      "../test-data-server/*": [
+        "js/*"
+      ],
     },
     "lib": [
       "esnext",
