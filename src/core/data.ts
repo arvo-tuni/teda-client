@@ -1,4 +1,5 @@
 import * as Defs from '@/core/decl';
+import * as WebLog from '../../../test-data-server/js/web/log.js';
 
 function request( method: string, path: string ): Promise<any> {
   return fetch( `http://localhost:3000/${path}`, {
@@ -40,11 +41,17 @@ export function meta( id: string ): Promise<Defs.TrialMetaExt> {
   return get( `trial/${id}/meta` );
 }
 
+export function hits( id: string ): Promise<number[] | WebLog.WrongAndCorrect[]> {
+  return get( `trial/${id}/hits` );
+}
+
+export function marks( id: string ): Promise<number[]> {
+  return get( `trial/${id}/marks` );
+}
+
 /*
 '/trial/:id': 'full trial data (WARNING! it may take tens of Mb to load)',
-'/trial/:id/hits': 'the trial selections per decimale',
 '/trial/:id/targets': 'the trial targets',
-'/trial/:id/marks': 'the trial marked targets',
 '/trial/:id/errors': 'the trial erroneously marked targets',
 '/trial/:id/events': 'the trial mouse click and scrolls',
 '/trial/:id/head': 'the trial head data (WARNING! it may take tens of Mb to load)',

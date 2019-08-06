@@ -1,18 +1,18 @@
 <template lang="pug">
-  #list.dropdown(:class="{ 'is-active': isListShown }")
-      .dropdown-trigger(@click.stop="")
-        button.button(aria-haspopup="true" aria-controls="dropdown-menu" @click="toggleList()")
-          span {{ item }}
-          span.icon.is-small
-            i.fas.fa-angle-down(aria-hidden="true")
-      .dropdown-menu(role="menu")
-        .dropdown-content
-          a.dropdown-item(
-            v-for="item in items" 
-            href="#"
-            :class="{ 'is-active': isSelected( item ) }"
-            @click.stop="select( item )"
-          ) {{ item }}
+  .list.dropdown(:class="{ 'is-active': isListShown }")
+    .dropdown-trigger(@click.stop="")
+      button.button(aria-haspopup="true" aria-controls="dropdown-menu" @click="toggleList()")
+        span {{ item }}
+        span.icon.is-small
+          i.fas.fa-angle-down(aria-hidden="true")
+    .dropdown-menu(role="menu")
+      .dropdown-content
+        a.dropdown-item(
+          v-for="item in items" 
+          href="#"
+          :class="{ 'is-active': isSelected( item ) }"
+          @click.stop="select( item )"
+        ) {{ item }}
 </template>
 
 <script lang="ts">
@@ -94,12 +94,16 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="less">
+.list {
+  width: 100%;
+}
 .dropdown-trigger {
+  width: 100%;
   .button {
-    width: 20em;
+    width: 100%;
   }
 }
 .dropdown-menu {
-  width: 20em;
+  width: 100%;
 }
 </style>

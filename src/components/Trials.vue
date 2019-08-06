@@ -11,7 +11,7 @@
         i.fas.fa-book(aria-hidden="true")
       .has-text-left
         .trial-info.is-flex
-          span {{ trial.participant }}
+          span(v-if="trial.participant") {{ trial.participant }}
           span.has-text-weight-bold {{ trial.type }}
         .timestamp {{ formatDate( trial.timestamp ) }}
 </template>

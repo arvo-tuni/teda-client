@@ -96,30 +96,34 @@ export default Vue.extend({
 
     load( testName: string ) {
 
+      if (this.testName === testName) {
+        return;
+      }
+
+      this.selectTrial( '' );
+      this.testName = '';
       this.successMessage = '';
       this.errorMessage = '';
 
-      if (this.testName !== testName) {
-        this.isLoading = true;
+      this.isLoading = true;
 
-        Data.load( testName )
-          .then( (respond: Error) => {
-            if (respond.message === 'OK') {
-              this.successMessage = 'Success';
-              this.testName = testName;
-              return Promise.resolve();
-            }
-            else {
-              return Promise.reject();
-            }
-          })
-          .catch( (err: Error) => {
-            this.showError( err );
-          })
-          .finally( () => {
-            this.isLoading = false;
-          });
-      }
+      Data.load( testName )
+        .then( (respond: Error) => {
+          if (respond.message === 'OK') {
+            this.successMessage = 'Success';
+            this.testName = testName;
+            return Promise.resolve();
+          }
+          else {
+            return Promise.reject();
+          }
+        })
+        .catch( (err: Error) => {
+          this.showError( err );
+        })
+        .finally( () => {
+          this.isLoading = false;
+        });
     },
 
     isVisualizationSelected( name: string ): boolean {
