@@ -2,6 +2,8 @@ import * as Defs from '@/core/decl';
 import * as WebLog from '../../../test-data-server/js/web/log';
 import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
 
+let cache: any = {};
+
 function request( method: string, path: string ): Promise<any> {
   return fetch( `http://localhost:3000/${path}`, {
     method,
@@ -18,12 +20,27 @@ function request( method: string, path: string ): Promise<any> {
   });
 }
 
+function put( path: string ): Promise<any> {
+  return request( 'PUT', path );
+}
+
 function get( path: string ): Promise<any> {
   return request( 'GET', path );
 }
 
-function put( path: string ): Promise<any> {
-  return request( 'PUT', path );
+function getCachedTrial( id: string, path: string ): Promise<any> {
+  if (cache[ id ] && cache[ id ][ path ]) {
+    return Promise.resolve( cache[ id ][ path ] );
+  }
+  else {
+    return get( `trial/${id}/${path}` ).then( data => {
+      if (!cache[ id ]) {
+        cache[ id ] = {};
+      }
+      cache[ id ][ path ] = data;
+      return Promise.resolve( data );
+    });
+  }
 }
 
 export function load( name: string ): Promise<Error> {
@@ -39,35 +56,35 @@ export function trials(): Promise<Defs.TrialMeta[]> {
 }
 
 export function meta( id: string ): Promise<Defs.TrialMetaExt> {
-  return get( `trial/${id}/meta` );
+  return getCachedTrial( id, 'meta' );
 }
 
 export function hits( id: string ): Promise<number[] | WebLog.WrongAndCorrect[]> {
-  return get( `trial/${id}/hits` );
+  return getCachedTrial( id, 'hits' );
 }
 
 export function marksCorrect( id: string ): Promise<number[]> {
-  return get( `trial/${id}/marks` );
+  return getCachedTrial( id, 'marks' );
 }
 
 export function marksWrong( id: string ): Promise<number[]> {
-  return get( `trial/${id}/errors` );
+  return getCachedTrial( id, 'errors' );
 }
 
 export function targets( id: string ): Promise<WebLog.Clickable[]> {
-  return get( `trial/${id}/targets` );
+  return getCachedTrial( id, 'targets' );
 }
 
 export function events( id: string ): Promise<WebLog.TestEvent[]> {
-  return get( `trial/${id}/events` );
+  return getCachedTrial( id, 'events' );
 }
 
 export function fixations( id: string ): Promise<GazeEvent.Fixation[]> {
-  return get( `trial/${id}/gaze/fixations` );
+  return getCachedTrial( id, 'gaze/fixations' );
 }
 
 export function saccades( id: string ): Promise<GazeEvent.Fixation[]> {
-  return get( `trial/${id}/gaze/saccades` );
+  return getCachedTrial( id, 'gaze/saccades' );
 }
 
 /*
