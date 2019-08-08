@@ -54,7 +54,7 @@ export default Vue.extend({
 
   computed: {
     hasData(): boolean {
-      return this.meta && this.targets.length > 0 && !!this.marksCorrect && !!this.marksWrong;
+      return this.meta.duration > 0 && this.targets.length > 0 && !!this.marksCorrect && !!this.marksWrong;
     },
   },
 
@@ -82,10 +82,10 @@ export default Vue.extend({
         })
         .then( (marks: number[]) => {
           this.marksWrong = marks;
-
-          this.$nextTick().then( () => {
-            this.drawTargets( this.$refs.targets as HTMLCanvasElement );
-          });
+          return this.$nextTick();
+        })
+        .then( () => {
+          this.drawTargets( this.$refs.targets as HTMLCanvasElement );
         })
         .catch( (error: Error) => {
           this.errorMessage = 'Cannot retrieve data: ' + (error ? error.message : 'unknown error') + '. Close this message to try again';

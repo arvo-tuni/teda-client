@@ -1,5 +1,6 @@
 import * as Defs from '@/core/decl';
-import * as WebLog from '../../../test-data-server/js/web/log.js';
+import * as WebLog from '../../../test-data-server/js/web/log';
+import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
 
 function request( method: string, path: string ): Promise<any> {
   return fetch( `http://localhost:3000/${path}`, {
@@ -57,15 +58,25 @@ export function targets( id: string ): Promise<WebLog.Clickable[]> {
   return get( `trial/${id}/targets` );
 }
 
+export function events( id: string ): Promise<WebLog.TestEvent[]> {
+  return get( `trial/${id}/events` );
+}
+
+export function fixations( id: string ): Promise<GazeEvent.Fixation[]> {
+  return get( `trial/${id}/gaze/fixations` );
+}
+
+export function saccades( id: string ): Promise<GazeEvent.Fixation[]> {
+  return get( `trial/${id}/gaze/saccades` );
+}
+
 /*
 '/trial/:id': 'full trial data (WARNING! it may take tens of Mb to load)',
-'/trial/:id/events': 'the trial mouse click and scrolls',
 '/trial/:id/head': 'the trial head data (WARNING! it may take tens of Mb to load)',
 '/trial/:id/gaze': 'the trial Tobii recording meta data (WARNING! it may take tens of Mb to load)',
 '/trial/:id/gaze/stimuli': 'the trial gaze stimuli',
 '/trial/:id/gaze/events': 'the trial mouse and keyboards events',
 '/trial/:id/gaze/samples': 'the trial gaze samples',
-'/trial/:id/gaze/fixations': 'the trial fixations',
 '/trial/:id/gaze/saccades': 'the trial saccades',
 '/trial/:id/gaze/gazeAways': 'the trial gazeAways',
 
