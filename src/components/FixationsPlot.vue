@@ -10,17 +10,11 @@
               input.checkbox(type="range" min="5" max="100" v-model="pixelsPerSecond")
             p.control {{ pixelsPerSecond }}
         .field.stacked-horz
-          label.checkbox
-            input.checkbox(type="checkbox" v-model="colorized")
-            span Colorized
+          checkbox(v-model="colorized" label="Colorized" size="1.5em")
         .field.stacked-horz
-          label.checkbox
-            input.checkbox(type="checkbox" v-model="showSaccades")
-            span Saccades
+          checkbox(v-model="showSaccades" label="Saccades" size="1.5em")
         .field.stacked-horz
-          label.checkbox
-            input.checkbox(type="checkbox" v-model="keepProportions")
-            span Keep proportions
+          checkbox(v-model="keepProportions" label="Keep proportions" size="1.5em")
 
     canvas(v-if="hasData" ref="plot" width="1280" :height="canvasHeight")
     
@@ -34,6 +28,7 @@ import Vue from 'vue';
 
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
+import Checkbox from '@/components/BulmaCheckbox.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
@@ -64,6 +59,7 @@ export default Vue.extend({
   components: {
     Waiting,
     Message,
+    Checkbox,
   },
 
   data() {
