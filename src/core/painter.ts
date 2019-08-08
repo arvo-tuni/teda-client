@@ -9,6 +9,7 @@ export interface FixPlotOptions {
   pixelsPerSecond: number;
   colorized: boolean;
   saccades: boolean;
+  timeRange: number[];
 }
 
 export class Target {
@@ -54,15 +55,24 @@ export class Painter {
     };
   }
 
-  private drawSaccades( fixations: Fixation[] ) {
+  private drawSaccades( fixations: Fixation[], options: FixPlotOptions ) {
     this.ctx.strokeStyle = SACCADE_COLOR;
     this.ctx.beginPath();
 
-    const startPoint = this.calcPoint({ x: fixations[0].x, y: fixations[0].y });
-    this.ctx.moveTo( startPoint.x, startPoint.y );
+    const startTime = fixations[0].timestamp.RecordingTimestamp;
+    
+    let hasFirstFixation = false;
 
     fixations.forEach( (fix, index) => {
-      if (!index) {
+      const ts = fix.timestamp.RecordingTimestamp - startTime;
+      if (ts < options.timeRange[0] || ts > options.timeRange[1]) {
+        return;
+      }
+
+      if (!hasFirstFixation) {
+        const startPoint = this.calcPoint({ x: fix.x, y: fix.y });
+        this.ctx.moveTo( startPoint.x, startPoint.y );
+        hasFirstFixation = true;
         return;
       }
 
@@ -103,7 +113,7 @@ export class Painter {
   drawFixPlot( fixations: Fixation[], options: FixPlotOptions ) {
 
     if (options.saccades) {
-      this.drawSaccades( fixations );
+      this.drawSaccades( fixations, options );
     }
 
     this.ctx.strokeStyle = FIX_BORDER_COLOR;
@@ -113,11 +123,16 @@ export class Painter {
     const duration = fixations.slice( -1 )[0].timestamp.RecordingTimestamp - startTime; // last fixation
 
     fixations.forEach( fix => {
+      const ts = fix.timestamp.RecordingTimestamp - startTime;
+      if (ts < options.timeRange[0] || ts > options.timeRange[1]) {
+        return;
+      }
+
       const point = this.calcPoint({ x: fix.x, y: fix.y });
       const radius = Math.max( 2, fix.duration * options.pixelsPerSecond / 1000 );
 
       if (options.colorized) {
-        const hue = Math.round( (fix.timestamp.RecordingTimestamp - startTime) / duration * 300 ); // 300 is max hue (violet)
+        const hue = Math.round( ts / duration * 300 ); // 300 is max hue (violet)
         this.ctx.fillStyle = `hsla(${hue}, 80%, 80%, 0.65)`;
       }
 

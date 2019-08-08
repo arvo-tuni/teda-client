@@ -7,16 +7,20 @@
 </template>
 
 <script lang="ts">
-/**
- * @fires input
- */
+
+interface CompData {
+  checked: boolean;
+}
+
+/// Emits
+///   input( value )
 export default {
-  name: 'bulma-checkbox',
+  name: 'checkbox',
 
   data() {
     return {
       checked: !!this.value || false,
-    };
+    } as CompData;
   },
 
   props: {
@@ -62,44 +66,43 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .bulma-checkbox {
-    --size: 2.25em;
+.bulma-checkbox {
+  --size: 2.25em;
 
-    position: relative;
-    line-height: var(--size);
+  position: relative;
+  line-height: var(--size);
+  height: var(--size);
+
+  .button {
+    position: absolute;
+    left: 0;
+    top: 0;
     height: var(--size);
+    width: var(--size);
 
-    .button {
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: var(--size);
-      width: var(--size);
+    border: 1px solid #dbdbdb;
+    border-radius: 3px;
 
-      border: 1px solid #dbdbdb;
-      border-radius: 3px;
-
-      &[disabled] {
-        cursor: not-allowed;
-        background-color: white;
-        border-color: #dbdbdb;
-        box-shadow: none;
-        opacity: 0.5;
-      }
-    }
-
-    label {
-      display: inline-block;
-
-      line-height: calc( var(--size) - 0.5em );
-      padding: 0.25em 0.5em 0.25em calc( var(--size) + 0.25em );
-      cursor: pointer;
-
-      &[disabled] {
-        cursor: not-allowed;
-        color: #7a7a7a;
-      }
+    &[disabled] {
+      cursor: not-allowed;
+      background-color: white;
+      border-color: #dbdbdb;
+      box-shadow: none;
+      opacity: 0.5;
     }
   }
 
+  label {
+    display: inline-block;
+
+    line-height: calc( var(--size) - 0.5em );
+    padding: 0.25em 0.5em 0.25em calc( var(--size) + 0.25em );
+    cursor: pointer;
+
+    &[disabled] {
+      cursor: not-allowed;
+      color: #7a7a7a;
+    }
+  }
+}
 </style>

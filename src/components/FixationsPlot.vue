@@ -4,19 +4,43 @@
       .field.is-horizontal
         .field.is-horizontal.one-line.stacked-horz
           .field-label
-            label Pixels per second
+            label Fixation size
           .field-body
-            p.control.stacked-horz
-              slider.is-primary.is-round(min="5" max="100" size="1.75em" v-model="pixelsPerSecond")
-            p.control {{ pixelsPerSecond }}
-        .field.stacked-horz
-          checkbox(v-model="colorized" label="Colorized" size="1.5em")
-        .field.stacked-horz
-          checkbox(v-model="showSaccades" label="Saccades" size="1.5em")
-        .field.stacked-horz
-          checkbox(v-model="keepProportions" label="Keep proportions" size="1.5em")
-      .field
+            p.control.stacked-horz.pixelsPerSecond
+              //- slider.is-primary.is-round(:min.number="5" :max.number="100" size="1.75em" v-model="pixelsPerSecond")
+              vue-slider(
+                :min="5" 
+                :max="100"
+                width="140" 
+                tooltip="always" 
+                :tooltip-formatter="pixelsPerSeocndFormatter" 
+                v-model="pixelsPerSecond"
+              )
+            //- p.control {{ pixelsPerSecond }}
+        .field.stacked-horz(@click="colorized = !colorized")
+          input.is-checkradio(type="checkbox" name="colorized" :checked="colorized")
+          label(for="colorized") Colorized
+          //- checkbox(v-model="colorized" label="Colorized" size="1.5em")
 
+        .field.stacked-horz(@click="showSaccades = !showSaccades")
+          input.is-checkradio(type="checkbox" name="showSaccades" :checked="showSaccades")
+          label(for="showSaccades") Saccades
+          //- checkbox(v-model="showSaccades" label="Saccades" size="1.5em")
+          
+        .field.stacked-horz(@click="keepProportions = !keepProportions")
+          input.is-checkradio(type="checkbox" name="keepProportions" :checked="keepProportions")
+          label(for="keepProportions") Keep proportions
+          //- checkbox(v-model="keepProportions" label="Keep proportions" size="1.5em")
+          
+      .field.has-addons.one-line
+        label.stacked-horz Time range
+        p.control.is-expanded
+          vue-slider.is-fullwidth(
+            v-model="timeRange" 
+            :min="0" 
+            :max="duration"
+            :tooltip-formatter="timeRangeFormatter" 
+          )
 
     canvas(v-if="hasData" ref="plot" width="1280" :height="canvasHeight")
     
@@ -30,8 +54,11 @@ import Vue from 'vue';
 
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
-import Checkbox from '@/components/BulmaCheckbox.vue';
-import Slider from '@/components/Slider.vue';
+// import Checkbox from '@/components/Checkbox.vue';
+// import Slider from '@/components/Slider.vue';
+
+import VueSlider from 'vue-slider-component';
+import 'vue-slider-component/theme/default.css';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
@@ -41,6 +68,7 @@ import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
 import { Gaze } from '../../../test-data-server/js/tobii/log';
 
 import { Target, Painter } from '@/core/painter';
+import { secToTime } from '@/core/format';
 
 interface CompData {
   painter: Painter | null;
@@ -53,6 +81,7 @@ interface CompData {
   keepProportions: boolean;
   colorized: boolean;
   showSaccades: boolean;
+  timeRange: number[];
   errorMessage: string;
 }
 
@@ -62,8 +91,9 @@ export default Vue.extend({
   components: {
     Waiting,
     Message,
-    Checkbox,
-    Slider,
+    // Checkbox,
+    // Slider,
+    VueSlider,
   },
 
   data() {
@@ -78,6 +108,7 @@ export default Vue.extend({
       keepProportions: true,
       colorized: true,
       showSaccades: false,
+      timeRange: [0, 1],
       errorMessage: '',
     } as CompData;
   },
@@ -102,10 +133,25 @@ export default Vue.extend({
         const ratio = this.meta.contentArea.height / this.meta.contentArea.width;
         return 1280 * ratio;
       }
-    }
+    },
+
+    duration(): number {
+      return this.meta.duration ? Math.round( this.meta.duration / 1000 + 1 ): 1;
+    },
+
+    pixelsPerSeocndFormatter(): string {
+      return '{value} px/sec';
+    },
+
+    timeRangeFormatter(): any {
+      return v => secToTime(v);
+    },
   },
 
   methods: {
+    setColorized( e ) {
+      console.log(e);
+    },
     loadData() {
       this.errorMessage = '';
 
@@ -134,6 +180,7 @@ export default Vue.extend({
           return this.$nextTick();
         })
         .then( () => {
+          this.timeRange = [0, Math.round( this.meta.duration / 1000 + 1 )];
           this.drawPlot( this.$refs.plot as HTMLCanvasElement );
         })
         .catch( (error: Error) => {
@@ -161,6 +208,7 @@ export default Vue.extend({
           pixelsPerSecond: this.pixelsPerSecond,
           colorized: this.colorized,
           saccades: this.showSaccades,
+          timeRange: this.timeRange.map( item => item * 1000 ),
         });
       }
     },
@@ -195,6 +243,9 @@ export default Vue.extend({
         this.updatePlot();
       });
     },
+    timeRange( value: number[] ) {
+      this.updatePlot();
+    },
   },
 });
 
@@ -209,5 +260,8 @@ export default Vue.extend({
 }
 .one-line {
   white-space: nowrap;
+}
+.pixelsPerSecond {
+  width: 100px;
 }
 </style>

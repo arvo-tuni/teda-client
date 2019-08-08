@@ -3,6 +3,9 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 
+import 'bulma/css/bulma.min.css';
+import 'bulma-extensions/bulma-checkradio/dist/css/bulma-checkradio.min.css';
+
 Vue.config.productionTip = false;
 
 new Vue({
