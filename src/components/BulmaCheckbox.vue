@@ -38,8 +38,7 @@ export default {
   },
 
   methods: {
-    /** @param {Event} e */
-    toggle( e ) {
+    toggle( e: Event ) {
       if ( this.disabled ) {
         return;
       }

@@ -7,7 +7,7 @@
             label Pixels per second
           .field-body
             p.control.stacked-horz
-              input.checkbox(type="range" min="5" max="100" v-model="pixelsPerSecond")
+              slider.is-primary.is-round(min="5" max="100" size="1.75em" v-model="pixelsPerSecond")
             p.control {{ pixelsPerSecond }}
         .field.stacked-horz
           checkbox(v-model="colorized" label="Colorized" size="1.5em")
@@ -15,6 +15,8 @@
           checkbox(v-model="showSaccades" label="Saccades" size="1.5em")
         .field.stacked-horz
           checkbox(v-model="keepProportions" label="Keep proportions" size="1.5em")
+      .field
+
 
     canvas(v-if="hasData" ref="plot" width="1280" :height="canvasHeight")
     
@@ -29,6 +31,7 @@ import Vue from 'vue';
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
 import Checkbox from '@/components/BulmaCheckbox.vue';
+import Slider from '@/components/Slider.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
@@ -37,7 +40,7 @@ import * as WebLog from '../../../test-data-server/js/web/log.js';
 import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
 import { Gaze } from '../../../test-data-server/js/tobii/log';
 
-import { Target, Fixation, Painter } from '@/core/painter';
+import { Target, Painter } from '@/core/painter';
 
 interface CompData {
   painter: Painter | null;
@@ -60,6 +63,7 @@ export default Vue.extend({
     Waiting,
     Message,
     Checkbox,
+    Slider,
   },
 
   data() {
@@ -202,9 +206,6 @@ export default Vue.extend({
 }
 .stacked-horz {
   margin-right: 1em;
-}
-input.checkbox {
-  margin: 0 0.5em;
 }
 .one-line {
   white-space: nowrap;
