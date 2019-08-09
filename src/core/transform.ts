@@ -9,6 +9,13 @@ export interface Fixation {
   duration: number;
 }
 
+export interface Saccade {
+  timestamp: Timestamp;
+  amplitude: number;
+  absoluteAngle: number;
+  relativeAngle: number;
+}
+
 export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: WebLog.TestEvent[] ): Fixation[]  {
   const scrolls = events.filter( event => event.type === 'scroll' ) as WebLog.TestEventScroll[];
 
@@ -16,7 +23,7 @@ export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: We
   let nextScroll: WebLog.TestEventScroll | null = scrolls.length > 0 ? scrolls[0] : null;
   let scrollIndex = 1;
 
-  return fixations.map( (fix, i) => {
+  return fixations.map( fix => {
 
     while (nextScroll && nextScroll.timestamp < fix.timestamp.LocalTimeStamp) {
       scrollPosition = nextScroll.position;
@@ -30,4 +37,24 @@ export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: We
       duration: fix.duration,
     };
   });
+}
+
+export function getSaccades( fixations: GazeEvent.Fixation[] ): Saccade[]  {
+  return fixations.map( fix => {
+    return {
+      timestamp: fix.timestamp,
+      amplitude: fix.saccadicAmplitude,
+      absoluteAngle: fix.absoluteSaccadicDirection,
+      relativeAngle: fix.relativeSaccadicDirection,
+    };
+  });
+}
+
+export function averageDuration( fixations: Fixation[] ): number {
+  if (fixations.length === 0) {
+    return 0;
+  }
+  else {
+    return fixations.reduce( (acc, fix) => acc += fix.duration, 0 ) / fixations.length;
+  }
 }

@@ -32,7 +32,7 @@ export function msToTime( duration: number ): string {
 }
 
 export function secToTime( duration: number ): string {
-  let time = duration;
+  let time = Math.round( duration );
   if (duration === 0) {
     return '00:00';
   }

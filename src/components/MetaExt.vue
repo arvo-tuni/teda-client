@@ -9,40 +9,36 @@
 
       section.section(v-if="properties.settings")
         h5.title.is-5 Settings: 
-        div Duration: {{ properties.settings.duration }} seconds
-        div Content width: {{ properties.settings.contentWidth }}
-        div Content left {{ properties.settings.contentLeft }}
-        div Font: {{ properties.settings.fontSize }} pt
+        .property Duration: {{ properties.settings.duration }} seconds
+        .property Content width: {{ properties.settings.contentWidth }}
+        .property Content left {{ properties.settings.contentLeft }}
+        .property Font: {{ properties.settings.fontSize }} pt
         template(v-if="properties.settings.wordSpacing !== undefined")
-          div Word spacing: {{ properties.settings.wordSpacing }}
-          div Text color: {{ properties.settings.foreground }}
-          div Page color: {{ properties.settings.background }}
-          div Cursor: {{ properties.settings.cursor }}
-          div Letter spacing: {{ properties.settings.letterSpacing }}
-          div Line height: {{ properties.settings.lineHeight }}
+          .property Word spacing: {{ properties.settings.wordSpacing }}
+          .property Text color: {{ properties.settings.foreground }}
+          .property Page color: {{ properties.settings.background }}
+          .property Cursor: {{ properties.settings.cursor }}
+          .property Letter spacing: {{ properties.settings.letterSpacing }}
+          .property Line height: {{ properties.settings.lineHeight }}
 
       section.section
         h5.title.is-5 Instruction: 
-        div {{ properties.instruction }}
+        .property {{ properties.instruction }}
 
       section.section
         h5.title.is-5 Summary: 
-        div marked total: {{ properties.marks }}
-        div(v-if="properties.marksWrong !== undefined") marked incorrectly: {{ properties.marksWrong }}
-        div missed: {{ properties.misses }}
-        div scrolls: {{ properties.scrolls }}
-        div scrolled to: {{ properties.maxScroll }}
+        .property marked total: {{ properties.marks }}
+        .property(v-if="properties.marksWrong !== undefined") marked incorrectly: {{ properties.marksWrong }}
+        .property missed: {{ properties.misses }}
+        .property scrolls: {{ properties.scrolls }}
+        .property scrolled to: {{ properties.maxScroll }}
 
       section.section(v-if="properties.headTotals") 
         h5.title.is-5 Head observations
-        div Roll: {{ formarHeadData( properties.headTotals.roll ) }};
-        div Pitch: {{ formarHeadData( properties.headTotals.pitch ) }};
-        div Heading: {{ formarHeadData( properties.headTotals.heading ) }};
-        div Movement: {{ formarHeadData( properties.headTotals.movement ) }};
-
-      section.section(v-show="hasHits")
-        h5.title.is-5 Hits histogram
-        canvas(ref="hits" width="300" height="100")
+        .property Roll: {{ formarHeadData( properties.headTotals.roll ) }};
+        .property Pitch: {{ formarHeadData( properties.headTotals.pitch ) }};
+        .property Heading: {{ formarHeadData( properties.headTotals.heading ) }};
+        .property Movement: {{ formarHeadData( properties.headTotals.movement ) }};
 
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -52,7 +48,6 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import Chart from 'chart.js';
 
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
@@ -65,9 +60,7 @@ import * as WebLog from '@server/web/log';
 
 interface CompData {
   properties: Defs.TrialMetaExt;
-  hits: any[];
   errorMessage: string;
-  chart: any;
 }
 
 export default Vue.extend({
@@ -81,9 +74,7 @@ export default Vue.extend({
   data() {
     return {
       properties: new Defs.TrialMetaExt(),
-      hits: [],
       errorMessage: '',
-      chart: null,
     } as CompData;
   },
 
@@ -97,10 +88,6 @@ export default Vue.extend({
   computed: {
     subject(): string {
       return this.properties.participantCode ? this.properties.participantCode : 'Someone';
-    },
-
-    hasHits(): boolean {
-      return this.hits.length > 1;
     },
   },
 
@@ -129,58 +116,12 @@ export default Vue.extend({
       Data.meta( this.trial )
         .then( (metaExt: Defs.TrialMetaExt) => {
           this.properties = metaExt;
-          return Data.hits( this.trial );
-        })
-        .then( (hits: any[]) => {
-          this.hits = hits;
-          this.createHitsGraph( this.$refs.hits as HTMLCanvasElement );
         })
         .catch( (error: Error) => {
           this.errorMessage = 'Cannot retrieve data: '
             + (error ? error.message : 'unknown error')
             + '. Close this message to try again';
         });
-    },
-
-    createHitsGraph( el: HTMLCanvasElement ) {
-      const datasets: Array<{data: number[], label: string, backgroundColor: string}> = [];
-
-      if (this.hits[0].wrong !== undefined) {
-        datasets.push({
-          label: 'wrong',
-          data: this.hits.map( (item: WebLog.WrongAndCorrect) => item.wrong ),
-          backgroundColor: 'rgba(255, 0, 0, 0.3)',
-        });
-        datasets.push({
-          label: 'correct',
-          data: this.hits.map( (item: WebLog.WrongAndCorrect) => item.correct ),
-          backgroundColor: 'rgba(0, 255, 0, 0.3)',
-        });
-      }
-      else {
-        datasets.push({
-          label: 'total',
-          data: this.hits,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-        });
-      }
-
-      this.chart = new Chart( el, {
-        type: 'bar',
-        data: {
-          labels: datasets[0].data.map( (val: number, index: number) => `${(index + 1) * 10}%` ),
-          datasets,
-        },
-        options: {
-          scales: {
-            yAxes: [{
-              ticks: {
-                max: this.properties.maxHistPerTenth + 2,
-              },
-            }],
-          },
-        },
-      });
     },
   },
 
@@ -200,7 +141,6 @@ export default Vue.extend({
   }
 }
 .property {
-  margin: 1em 0;
 }
 .subProperty {
   font-size: smaller;

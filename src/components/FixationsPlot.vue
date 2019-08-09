@@ -1,6 +1,6 @@
 <template lang="pug">
   #fixplot
-    .settings
+    .settings(v-if="hasData")
       .field.is-horizontal
         .field.is-horizontal.one-line.stacked-horz
           .field-label
