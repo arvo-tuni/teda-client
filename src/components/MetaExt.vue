@@ -59,7 +59,7 @@ import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
-import * as WebLog from '../../../test-data-server/js/web/log.js';
+import * as WebLog from '@server/web/log.js';
 import { twoDigits, treeDigits, secToTime, toDate} from '@/core/format';
 
 interface CompData {

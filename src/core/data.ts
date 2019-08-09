@@ -1,6 +1,6 @@
 import * as Defs from '@/core/decl';
-import * as WebLog from '../../../test-data-server/js/web/log';
-import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
+import * as WebLog from '@server/web/log';
+import * as GazeEvent from '@server/tobii/gaze-event';
 
 let cache: any = {};
 

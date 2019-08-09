@@ -1,4 +1,4 @@
-import * as WebLog from '../../../test-data-server/js/web/log.js';
+import * as WebLog from '@server/web/log.js';
 
 export class TrialMeta {
   

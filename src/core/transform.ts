@@ -1,6 +1,6 @@
-import * as WebLog from '../../../test-data-server/js/web/log.js';
-import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
-import { Timestamp } from '../../../test-data-server/js/tobii/log.js';
+import * as WebLog from '@server/web/log.js';
+import * as GazeEvent from '@server/tobii/gaze-event';
+import { Timestamp } from '@server/tobii/log.js';
 
 export interface Fixation {
   timestamp: Timestamp;

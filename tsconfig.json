@@ -15,12 +15,8 @@
       "webpack-env"
     ],
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "../test-data-server/*": [
-        "js/*"
-      ],
+      "@/*": [ "src/*" ],
+      "@server/*": [ "../test-data-server/js/*" ]
     },
     "lib": [
       "esnext",

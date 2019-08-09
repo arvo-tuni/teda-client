@@ -62,9 +62,9 @@ import 'vue-slider-component/theme/default.css';
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
-import * as WebLog from '../../../test-data-server/js/web/log.js';
-import * as GazeEvent from '../../../test-data-server/js/tobii/gaze-event';
-import { Gaze } from '../../../test-data-server/js/tobii/log';
+import * as WebLog from '@server/web/log.js';
+import * as GazeEvent from '@server/tobii/gaze-event';
+import { Gaze } from '@server/tobii/log';
 
 import { Target, Painter } from '@/core/painter';
 import { secToTime } from '@/core/format';

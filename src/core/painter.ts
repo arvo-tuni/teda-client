@@ -1,7 +1,7 @@
 import { Fixation } from '@/core/transform';
-import * as WebLog from '../../../test-data-server/js/web/log.js';
+import * as WebLog from '@server/web/log.js';
 
-const AREA_EXTENSION = 0;
+const AREA_EXTENSION = 100;
 const TARGET_BORDER_COLOR = '#666';
 const TARGET_CLICKED_OK_COLOR = '#8cf';
 const TARGET_CLICKED_WRONG_COLOR = '#fc8';
@@ -148,9 +148,9 @@ export class Painter {
   }
 
   drawTargets( targets: Target[], options?: TargetOptions ) {
-    options = options || {};
+    const opt = options || {};
 
-    this.ctx.strokeStyle = options.borderColor ? options.borderColor : TARGET_BORDER_COLOR;
+    this.ctx.strokeStyle = opt.borderColor ? opt.borderColor : TARGET_BORDER_COLOR;
 
     targets.forEach( target => {
       const rect  = this.calcRect( target.bounds );
@@ -161,12 +161,12 @@ export class Painter {
 
       if (target.isClicked) {
         this.ctx.fillStyle = target.isCorrectClick ? 
-          (options.clickedOkColor || TARGET_CLICKED_OK_COLOR) : 
-          (options.clickedWrongColor || TARGET_CLICKED_WRONG_COLOR);
+          (opt.clickedOkColor || TARGET_CLICKED_OK_COLOR) : 
+          (opt.clickedWrongColor || TARGET_CLICKED_WRONG_COLOR);
         this.ctx.fillRect( rect.x, rect.y, rect.width, rect.height );
       }
       else {
-        this.ctx.fillStyle = options.unclickedColor ? options.unclickedColor : TARGET_UNCLICKED_COLOR;
+        this.ctx.fillStyle = opt.unclickedColor ? opt.unclickedColor : TARGET_UNCLICKED_COLOR;
         this.ctx.fillRect( rect.x, rect.y, rect.width, rect.height );
       }
 
