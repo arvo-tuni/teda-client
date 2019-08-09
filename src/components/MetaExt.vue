@@ -60,7 +60,7 @@ import Message from '@/components/Message.vue';
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
 import * as WebLog from '../../../test-data-server/js/web/log.js';
-import { twoDigits, treeDigits, msToTime, toDate} from '@/core/format';
+import { twoDigits, treeDigits, secToTime, toDate} from '@/core/format';
 
 interface CompData {
   properties: Defs.TrialMetaExt;
@@ -105,7 +105,7 @@ export default Vue.extend({
 
   methods: {
     toTime( duration: number ): string {
-      return msToTime( duration );
+      return secToTime( Math.floor( duration / 1000 ) );
     },
 
     formatDate( value: string ): string {

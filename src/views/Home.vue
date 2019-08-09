@@ -1,5 +1,5 @@
 <template lang="pug">
-  #home.container
+  #home
     template
       list(v-if="tests.length" prompt="Select a test" :items="tests" @selected="load")
       waiting(v-else is-modal=false is-bar=false)
@@ -167,7 +167,7 @@ export default Vue.extend({
 
 <style scoped lang="less">
 #home {
-  padding: 1em 0;
+  padding: 1em;
 }
 .fixed-footer {
   position: fixed;

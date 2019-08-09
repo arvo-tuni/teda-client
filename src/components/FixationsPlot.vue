@@ -12,7 +12,6 @@
                 :min="5" 
                 :max="100"
                 width="140" 
-                tooltip="always" 
                 :tooltip-formatter="pixelsPerSeocndFormatter" 
                 v-model="pixelsPerSecond"
               )
@@ -31,7 +30,7 @@
           input.is-checkradio(type="checkbox" name="keepProportions" :checked="keepProportions")
           label(for="keepProportions") Keep proportions
           //- checkbox(v-model="keepProportions" label="Keep proportions" size="1.5em")
-          
+
       .field.has-addons.one-line
         label.stacked-horz Time range
         p.control.is-expanded
@@ -42,7 +41,7 @@
             :tooltip-formatter="timeRangeFormatter" 
           )
 
-    canvas(v-if="hasData" ref="plot" width="1280" :height="canvasHeight")
+    canvas(v-if="hasData" ref="plot" :width="canvasWidth" :height="canvasHeight")
     
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -127,11 +126,20 @@ export default Vue.extend({
 
     canvasHeight(): number {
       if (!this.meta.contentArea.height || !this.keepProportions) {
-        return 720;
+        return 576;
       }
       else {
         const ratio = this.meta.contentArea.height / this.meta.contentArea.width;
-        return 1280 * ratio;
+        return this.canvasWidth * ratio;
+      }
+    },
+
+    canvasWidth(): number {
+      if (!this.meta.contentArea.width || !this.keepProportions) {
+        return 1024;
+      }
+      else {
+        return this.meta.contentArea.width ? this.meta.contentArea.width : 1024;
       }
     },
 
@@ -144,14 +152,11 @@ export default Vue.extend({
     },
 
     timeRangeFormatter(): any {
-      return v => secToTime(v);
+      return (value: number)  => secToTime( value );
     },
   },
 
   methods: {
-    setColorized( e ) {
-      console.log(e);
-    },
     loadData() {
       this.errorMessage = '';
 

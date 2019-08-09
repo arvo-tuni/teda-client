@@ -1,15 +1,36 @@
 import { Fixation } from '@/core/transform';
 import * as WebLog from '../../../test-data-server/js/web/log.js';
 
-const FIX_BORDER_COLOR = '#666';
+const AREA_EXTENSION = 0;
+const TARGET_BORDER_COLOR = '#666';
+const TARGET_CLICKED_OK_COLOR = '#8cf';
+const TARGET_CLICKED_WRONG_COLOR = '#fc8';
+const TARGET_UNCLICKED_COLOR = '#eee';
 const SACCADE_COLOR = '#888';
-const FIX_FILL_DEFAULT_COLOR = 'hsla(0, 80%, 80%, 0.5)';
+const FIX_BORDER_COLOR = '#666';
+const FIX_FILL_SATURATION = '80'; // %
+const FIX_FILL_LIGHTNESS = '80'; // %
+const FIX_FILL_ALPHA = '0.5';
+const FIX_FILL_DEFAULT_COLOR = `hsla(0, ${FIX_FILL_SATURATION}%, ${FIX_FILL_LIGHTNESS}%, ${FIX_FILL_ALPHA})`;
 
 export interface FixPlotOptions {
   pixelsPerSecond: number;
   colorized: boolean;
   saccades: boolean;
-  timeRange: number[];
+  timeRange?: number[];
+  saccadeColor?: string;
+  fixationColor?: string;
+  fixationBorderColor?: string;
+  fixationSaturation?: number;
+  fixationLightness?: number;
+  fixationAlpha?: number;
+}
+
+export interface TargetOptions {
+  borderColor?: string;
+  clickedOkColor?: string;
+  clickedWrongColor?: string;
+  unclickedColor?: string;
 }
 
 export class Target {
@@ -33,10 +54,15 @@ export class Painter {
 
   constructor( canvas: HTMLCanvasElement, area: WebLog.ContentArea ) {
     this.ctx = canvas.getContext( '2d' ) as CanvasRenderingContext2D;
-    this.scaleX = canvas.width / area.width;
-    this.scaleY = canvas.height / area.height;
-    this.offsetX = area.left;
-    this.offsetY = area.top;
+
+    const w = area.width + AREA_EXTENSION;
+    const h = area.height + AREA_EXTENSION;
+
+    this.scaleX = canvas.width / w;
+    this.scaleY = canvas.height / h;
+
+    this.offsetX = area.left - AREA_EXTENSION / 2;
+    this.offsetY = area.top - AREA_EXTENSION / 2;
   }
 
   private calcPoint( point: {x: number, y: number} ) {
@@ -55,17 +81,44 @@ export class Painter {
     };
   }
 
+  private setFixCtxParams( options: FixPlotOptions ) {
+    this.ctx.strokeStyle = options.fixationBorderColor ? 
+      options.fixationBorderColor : 
+      FIX_BORDER_COLOR;
+
+    this.ctx.fillStyle = options.fixationColor ? 
+      options.fixationColor : 
+      FIX_FILL_DEFAULT_COLOR;
+  }
+
+  private makeFixHslaTemplate( options: FixPlotOptions ): string {
+    const saturation = options.fixationSaturation !== undefined ? 
+      options.fixationSaturation : 
+      FIX_FILL_SATURATION;
+
+    const lightness = options.fixationLightness !== undefined ? 
+      options.fixationLightness : 
+      FIX_FILL_LIGHTNESS;
+
+    const alpha = options.fixationAlpha !== undefined ? 
+      options.fixationAlpha : 
+      FIX_FILL_ALPHA;
+
+    return `${saturation}%, ${lightness}%, ${alpha}`;
+  }
+
   private drawSaccades( fixations: Fixation[], options: FixPlotOptions ) {
-    this.ctx.strokeStyle = SACCADE_COLOR;
-    this.ctx.beginPath();
+    this.ctx.strokeStyle = options.saccadeColor ? options.saccadeColor : SACCADE_COLOR;
 
     const startTime = fixations[0].timestamp.RecordingTimestamp;
     
     let hasFirstFixation = false;
 
+    this.ctx.beginPath();
+
     fixations.forEach( (fix, index) => {
       const ts = fix.timestamp.RecordingTimestamp - startTime;
-      if (ts < options.timeRange[0] || ts > options.timeRange[1]) {
+      if (options.timeRange && (ts < options.timeRange[0] || ts > options.timeRange[1])) {
         return;
       }
 
@@ -84,15 +137,20 @@ export class Painter {
   }
 
   reset( area: WebLog.ContentArea ) {
-    this.scaleX = this.ctx.canvas.width / area.width;
-    this.scaleY = this.ctx.canvas.height / area.height;
+    const w = area.width + AREA_EXTENSION;
+    const h = area.height + AREA_EXTENSION;
+
+    this.scaleX = this.ctx.canvas.width / w;
+    this.scaleY = this.ctx.canvas.height / h;
 
     this.ctx.fillStyle = '#fff';
     this.ctx.fillRect( 0, 0, this.ctx.canvas.width, this.ctx.canvas.height );
   }
 
-  drawTargets( targets: Target[] ) {
-    this.ctx.strokeStyle = '#666';
+  drawTargets( targets: Target[], options?: TargetOptions ) {
+    options = options || {};
+
+    this.ctx.strokeStyle = options.borderColor ? options.borderColor : TARGET_BORDER_COLOR;
 
     targets.forEach( target => {
       const rect  = this.calcRect( target.bounds );
@@ -102,7 +160,13 @@ export class Painter {
       }
 
       if (target.isClicked) {
-        this.ctx.fillStyle = target.isCorrectClick ? '#8cf' : '#fc8';
+        this.ctx.fillStyle = target.isCorrectClick ? 
+          (options.clickedOkColor || TARGET_CLICKED_OK_COLOR) : 
+          (options.clickedWrongColor || TARGET_CLICKED_WRONG_COLOR);
+        this.ctx.fillRect( rect.x, rect.y, rect.width, rect.height );
+      }
+      else {
+        this.ctx.fillStyle = options.unclickedColor ? options.unclickedColor : TARGET_UNCLICKED_COLOR;
         this.ctx.fillRect( rect.x, rect.y, rect.width, rect.height );
       }
 
@@ -116,15 +180,15 @@ export class Painter {
       this.drawSaccades( fixations, options );
     }
 
-    this.ctx.strokeStyle = FIX_BORDER_COLOR;
-    this.ctx.fillStyle = FIX_FILL_DEFAULT_COLOR;
+    this.setFixCtxParams( options );
+    const hslaTemplate = this.makeFixHslaTemplate( options );
 
     const startTime = fixations[0].timestamp.RecordingTimestamp;                        // first fixation
     const duration = fixations.slice( -1 )[0].timestamp.RecordingTimestamp - startTime; // last fixation
 
     fixations.forEach( fix => {
       const ts = fix.timestamp.RecordingTimestamp - startTime;
-      if (ts < options.timeRange[0] || ts > options.timeRange[1]) {
+      if (options.timeRange && (ts < options.timeRange[0] || ts > options.timeRange[1])) {
         return;
       }
 
@@ -133,7 +197,7 @@ export class Painter {
 
       if (options.colorized) {
         const hue = Math.round( ts / duration * 300 ); // 300 is max hue (violet)
-        this.ctx.fillStyle = `hsla(${hue}, 80%, 80%, 0.65)`;
+        this.ctx.fillStyle = `hsla(${hue}, ${hslaTemplate})`;
       }
 
       this.ctx.beginPath();
