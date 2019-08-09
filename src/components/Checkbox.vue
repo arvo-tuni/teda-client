@@ -7,6 +7,7 @@
 </template>
 
 <script lang="ts">
+import Vue from 'vue';
 
 interface CompData {
   checked: boolean;
@@ -14,12 +15,12 @@ interface CompData {
 
 /// Emits
 ///   input( value )
-export default {
+export default Vue.extend({
   name: 'checkbox',
 
   data() {
     return {
-      checked: !!this.value || false,
+      checked: this.value,
     } as CompData;
   },
 
@@ -50,19 +51,18 @@ export default {
       this.checked = !this.checked;
       this.$emit( 'input', this.checked );
     },
-
   },
 
   watch: {
     value( val: boolean ) {
       this.checked = val;
-    }
+    },
   },
 
   mounted() {
     (this.$el as HTMLElement).style.setProperty( '--size', this.size );
   },
-};
+});
 </script>
 
 <style lang="less" scoped>

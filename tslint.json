@@ -5,7 +5,8 @@
   ],
   "linterOptions": {
     "exclude": [
-      "node_modules/**"
+      "node_modules/**",
+      "../test-data-server/**"
     ]
   },
   "rules": {
@@ -15,6 +16,10 @@
     "ordered-imports": false,
     "object-literal-sort-keys": false,
     "no-consecutive-blank-lines": false,
-    "typedef": false
+    "typedef": false,
+    "member-access": false,
+    "one-line": ["check-open-brace", "check-whitespace"],
+    "arrow-parens": false,
+    "max-classes-per-file": false
   }
 }

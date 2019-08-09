@@ -60,7 +60,7 @@ export default Vue.extend({
       .then( (trials: Defs.TrialMeta[]) => {
         this.trials = trials;
       });
-  }
+  },
 });
 
 </script>

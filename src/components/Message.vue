@@ -12,7 +12,7 @@ const AUTO_HIDE_INTERVAL = 3000; // ms
 
 interface CompData {
   enabled: boolean;
-  timer: number;
+  timer: any;
 }
 
 /// Emits:
@@ -41,16 +41,16 @@ export default Vue.extend({
   data() {
     return {
       enabled: !!this.message,
-      timer: 0,
+      timer: null,
     } as CompData;
   },
 
   computed: {
     cls(): any {
-      return { 
+      return {
         'is-danger': this.type === 'error',
         'is-success': this.type === 'success',
-      }
+      };
     },
   },
 
@@ -60,7 +60,7 @@ export default Vue.extend({
 
       if (this.timer) {
         clearTimeout( this.timer );
-        this.timer = 0;
+        this.timer = null;
       }
 
       if (!this.autoHide) {
@@ -76,12 +76,12 @@ export default Vue.extend({
       if (this.autoHide) {
         if (this.timer) {
           clearTimeout( this.timer );
-          this.timer = 0;
+          this.timer = null;
         }
 
         this.timer = setInterval( () => {
           this.enabled = false;
-          this.timer = 0;
+          this.timer = null;
         }, AUTO_HIDE_INTERVAL );
       }
     },

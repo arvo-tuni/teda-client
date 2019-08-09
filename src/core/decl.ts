@@ -1,7 +1,8 @@
-import * as WebLog from '@server/web/log.js';
+// import * as WebLog from '@server/web/log';   // HMM, this does not compile while the same string is OK in other files
+import * as WebLog from '../../../test-data-server/js/web/log.js';
 
 export class TrialMeta {
-  
+  /* tslint:disable-next-line */
   _id: string;
   participant: string;
   timestamp: Date;
@@ -9,7 +10,7 @@ export class TrialMeta {
 
   constructor() {
     this._id = '';
-    this.participant = ''; 
+    this.participant = '';
     this.timestamp = new Date();
     this.type = '';
   }
@@ -61,19 +62,21 @@ export class TrialMetaExt {
   }
 }
 
-        //this.hitsPerTenth = [ Number, WrongAndCorrect ];     // 10 values
-        //this.clickables = [ Clickable ];
-        // this.marked: number[];
-        // this.markedWrong = [Number];
-        // this.lastMarked = Number;
-        // this.events = [ 
-        //     TestEvent, 
-        //     TestEventBuild, 
-        //     TestEventClicked, 
-        //     TestEventScroll, 
-        //     TestEventVeroNav, 
-        //     TestEventVeroNavData,
-        //     TestEventVeroUI,
-        // ]; 
-        // this.gazze
-        // this.headData = [ HeadData ];
+// Data left out
+
+// this.hitsPerTenth = [ Number, WrongAndCorrect ];     // 10 values
+// this.clickables = [ Clickable ];
+// this.marked: number[];
+// this.markedWrong = [Number];
+// this.lastMarked = Number;
+// this.events = [
+//     TestEvent,
+//     TestEventBuild,
+//     TestEventClicked,
+//     TestEventScroll,
+//     TestEventVeroNav,
+//     TestEventVeroNavData,
+//     TestEventVeroUI,
+// ];
+// this.gaze
+// this.headData = [ HeadData ];

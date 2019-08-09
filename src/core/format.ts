@@ -48,15 +48,18 @@ export function secToTime( duration: number ): string {
 
 export function toDate( value: string ) {
   const d = new Date( value );
+
   const yyyymmdd = [
     twoDigits(d.getDate()),
-    twoDigits(d.getMonth()+1),
+    twoDigits(d.getMonth() + 1),
     d.getFullYear(),
   ];
+
   const hhmmss = [
     twoDigits(d.getHours()),
     twoDigits(d.getMinutes()),
     twoDigits(d.getSeconds()),
-  ]
+  ];
+
   return `${yyyymmdd.join('.')} ${hhmmss.join(':')}`;
 }

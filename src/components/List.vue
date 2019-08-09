@@ -24,8 +24,7 @@ interface CompData {
 }
 
 /// Emits:
-///   selected( item ) 
-
+///   selected( item )
 export default Vue.extend({
   name: 'list',
 

@@ -6,7 +6,10 @@
 <script lang="ts">
 import Vue from 'vue';
 
+import * as Transform from '@/core/transform';
+
 interface CompData {
+  fixations: Transform.Fixation[] | null;
 }
 
 export default Vue.extend({
@@ -14,6 +17,7 @@ export default Vue.extend({
 
   data() {
     return {
+      fixations: null,
     } as CompData;
   },
 

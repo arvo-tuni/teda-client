@@ -1,8 +1,9 @@
 import * as Defs from '@/core/decl';
+
 import * as WebLog from '@server/web/log';
 import * as GazeEvent from '@server/tobii/gaze-event';
 
-let cache: any = {};
+const cache: any = {};
 
 function request( method: string, path: string ): Promise<any> {
   return fetch( `http://localhost:3000/${path}`, {

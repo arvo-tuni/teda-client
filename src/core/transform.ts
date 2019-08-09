@@ -1,6 +1,6 @@
-import * as WebLog from '@server/web/log.js';
+import * as WebLog from '@server/web/log';
 import * as GazeEvent from '@server/tobii/gaze-event';
-import { Timestamp } from '@server/tobii/log.js';
+import { Timestamp } from '@server/tobii/log';
 
 export interface Fixation {
   timestamp: Timestamp;
@@ -10,7 +10,7 @@ export interface Fixation {
 }
 
 export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: WebLog.TestEvent[] ): Fixation[]  {
-  const scrolls: WebLog.TestEventScroll[] = events.filter( event => event.type === 'scroll' ) as WebLog.TestEventScroll[];
+  const scrolls = events.filter( event => event.type === 'scroll' ) as WebLog.TestEventScroll[];
 
   let scrollPosition = 0;
   let nextScroll: WebLog.TestEventScroll | null = scrolls.length > 0 ? scrolls[0] : null;

@@ -52,7 +52,7 @@ interface Data {
 
 export default Vue.extend({
   name: 'home',
-  
+
   components: {
     List,
     Message,

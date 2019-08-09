@@ -59,19 +59,20 @@ import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
-import * as WebLog from '@server/web/log.js';
 import { twoDigits, treeDigits, secToTime, toDate} from '@/core/format';
+
+import * as WebLog from '@server/web/log';
 
 interface CompData {
   properties: Defs.TrialMetaExt;
-  hits: Array<any>;
+  hits: any[];
   errorMessage: string;
   chart: any;
 }
 
 export default Vue.extend({
   name: 'metaExt',
-  
+
   components: {
     Waiting,
     Message,
@@ -113,7 +114,9 @@ export default Vue.extend({
     },
 
     formatArea( area: WebLog.ContentArea ): string {
-      return `(${Math.round( area.width )} x ${Math.round( area.height )}) at [${Math.round( area.left )},${Math.round( area.top )}]`;
+      return `(${Math.round( area.width )} x ${Math.round( area.height )})`
+        + ' at '
+        + `[${Math.round( area.left )},${Math.round( area.top )}]`;
     },
 
     formarHeadData( data: WebLog.HeadTotal ): string {
@@ -122,23 +125,25 @@ export default Vue.extend({
 
     loadData() {
       this.errorMessage = '';
-      
+
       Data.meta( this.trial )
         .then( (metaExt: Defs.TrialMetaExt) => {
           this.properties = metaExt;
           return Data.hits( this.trial );
         })
-        .then( (hits: Array<any>) => {
+        .then( (hits: any[]) => {
           this.hits = hits;
-          this.createHitsGraph( this.$refs.hits as Element );
+          this.createHitsGraph( this.$refs.hits as HTMLCanvasElement );
         })
         .catch( (error: Error) => {
-          this.errorMessage = 'Cannot retrieve data: ' + (error ? error.message : 'unknown error') + '. Close this message to try again';
+          this.errorMessage = 'Cannot retrieve data: '
+            + (error ? error.message : 'unknown error')
+            + '. Close this message to try again';
         });
     },
 
-    createHitsGraph( el: Element ) {
-      const datasets: {data: number[], label: string, backgroundColor: string}[] = [];
+    createHitsGraph( el: HTMLCanvasElement ) {
+      const datasets: Array<{data: number[], label: string, backgroundColor: string}> = [];
 
       if (this.hits[0].wrong !== undefined) {
         datasets.push({
@@ -163,7 +168,7 @@ export default Vue.extend({
       this.chart = new Chart( el, {
         type: 'bar',
         data: {
-          labels: datasets[0].data.map( (val: number, index: number) => `${(index + 1)*10}%` ),
+          labels: datasets[0].data.map( (val: number, index: number) => `${(index + 1) * 10}%` ),
           datasets,
         },
         options: {

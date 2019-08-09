@@ -36,7 +36,7 @@ export default Vue.extend({
   computed: {
     activeTab(): string {
       return this.$store.state.visualizationName;
-    }
+    },
   },
 
   methods: {

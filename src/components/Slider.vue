@@ -30,7 +30,7 @@ export default Vue.extend({
   methods: {
     setInput( e: Event ) {
       this.$emit( 'input', (e.target as HTMLInputElement).value );
-    }
+    },
   },
 
   mounted() {

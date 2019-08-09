@@ -51,23 +51,23 @@
 <script lang="ts">
 import Vue from 'vue';
 
+import VueSlider from 'vue-slider-component';
+import 'vue-slider-component/theme/default.css';
+
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
 // import Checkbox from '@/components/Checkbox.vue';
 // import Slider from '@/components/Slider.vue';
 
-import VueSlider from 'vue-slider-component';
-import 'vue-slider-component/theme/default.css';
-
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
-import * as WebLog from '@server/web/log.js';
-import * as GazeEvent from '@server/tobii/gaze-event';
-import { Gaze } from '@server/tobii/log';
-
 import { Target, Painter } from '@/core/painter';
 import { secToTime } from '@/core/format';
+
+import * as WebLog from '@server/web/log';
+import * as GazeEvent from '@server/tobii/gaze-event';
+import { Gaze } from '@server/tobii/log';
 
 interface CompData {
   painter: Painter | null;
@@ -144,7 +144,7 @@ export default Vue.extend({
     },
 
     duration(): number {
-      return this.meta.duration ? Math.round( this.meta.duration / 1000 + 1 ): 1;
+      return this.meta.duration ? Math.round( this.meta.duration / 1000 + 1 ) : 1;
     },
 
     pixelsPerSeocndFormatter(): string {
@@ -174,9 +174,9 @@ export default Vue.extend({
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {
-          this.fixations = Transform.toScrolledFixations( 
-            fixations as GazeEvent.Fixation[], 
-            this.events as WebLog.TestEvent[]
+          this.fixations = Transform.toScrolledFixations(
+            fixations as GazeEvent.Fixation[],
+            this.events as WebLog.TestEvent[],
           );
         //   return Data.saccades( this.trial );
         // })
@@ -189,7 +189,9 @@ export default Vue.extend({
           this.drawPlot( this.$refs.plot as HTMLCanvasElement );
         })
         .catch( (error: Error) => {
-          this.errorMessage = 'Cannot retrieve data: ' + (error ? error.message : 'unknown error') + '. Close this message to try again';
+          this.errorMessage = 'Cannot retrieve data: '
+            + (error ? error.message : 'unknown error')
+            + '. Close this message to try again';
         });
     },
 
@@ -223,7 +225,7 @@ export default Vue.extend({
         this.painter.reset( this.meta.contentArea );
         this.drawPlot();
       }
-    }
+    },
   },
 
   created() {
