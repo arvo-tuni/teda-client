@@ -3,14 +3,33 @@
     template(v-if="isLoaded")
       section.section(v-if="hasFixations")
         h3.title.is-3 Fixations
-        h5.title.is-5 Duration histogram
-        canvas(ref="fixDurations" width="1024" height="520")
-        h5.title.is-5 Temporal average duration histogram
-        canvas(ref="tempAvgFixDur" width="1024" height="520")
+        .charts.is-flex
+          .chart-container
+            h5.title.is-5 Duration histogram
+            canvas(ref="fixDurationsRange" width="640" height="320")
+          .chart-container
+            h5.title.is-5 Average duration
+            canvas(ref="fixDurationsTime" width="640" height="320")
+        h3.title.is-3 Saccades
+        .charts.is-flex
+          .chart-container
+            h5.title.is-5 Direction histogram
+            canvas(ref="saccadeDirections" width="640" height="320")
+          .chart-container
+            h5.title.is-5 Direction radar
+            canvas(ref="saccadeDirectionRadar" width="640" height="320")
+          .chart-container
+            h5.title.is-5 Amplitude histogram
+            canvas(ref="saccadeAmplitudeRange" width="640" height="320")
+          .chart-container
+            h5.title.is-5 Average amplitude
+            canvas(ref="saccadeAmplitudeTime" width="640" height="320")
       section.section(v-if="hasHits")
         h3.title.is-3 Results
-        h5.title.is-5 Hits histogram
-        canvas(ref="hits" width="1024" height="520")
+        .charts.is-flex
+          .chart-container
+            h5.title.is-5 Hits histogram
+            canvas(ref="hits" width="640" height="320")
 
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -40,9 +59,7 @@ interface CompData {
   saccades: Transform.Saccade[];
   hits: number[] | WebLog.WrongAndCorrect[];
   errorMessage: string;
-  fixDurationsChart: Chart | null;
-  hitsChart: Chart | null;
-  tempAvgFixDurChart: Chart | null;
+  charts: Chart[];
 }
 
 export default Vue.extend({
@@ -63,9 +80,7 @@ export default Vue.extend({
       saccades: [],
       hits: [],
       errorMessage: '',
-      fixDurationsChart: null,
-      hitsChart: null,
-      tempAvgFixDurChart: null,
+      charts: [],
     } as CompData;
   },
 
@@ -129,9 +144,15 @@ export default Vue.extend({
     },
 
     createCharts() {
-      this.fixDurationsChart = Charts.fixDurations( this.$refs.fixDurations as HTMLCanvasElement, this.fixations );
-      this.tempAvgFixDurChart = Charts.tempAvgFixDur( this.$refs.tempAvgFixDur as HTMLCanvasElement, this.fixations );
-      this.hitsChart = Charts.hits( this.$refs.hits as HTMLCanvasElement, this.hits );
+      this.charts = [
+        Charts.fixDurationsRange( this.$refs.fixDurationsRange as HTMLCanvasElement, this.fixations ),
+        Charts.fixDurationsTime( this.$refs.fixDurationsTime as HTMLCanvasElement, this.fixations ),
+        Charts.saccadeDirections( this.$refs.saccadeDirections as HTMLCanvasElement, this.saccades ),
+        Charts.saccadeDirectionRadar( this.$refs.saccadeDirectionRadar as HTMLCanvasElement, this.saccades ),
+        Charts.saccadeAmplitudeRange( this.$refs.saccadeAmplitudeRange as HTMLCanvasElement, this.saccades ),
+        Charts.saccadeAmplitudeTime( this.$refs.saccadeAmplitudeTime as HTMLCanvasElement, this.saccades ),
+        Charts.hits( this.$refs.hits as HTMLCanvasElement, this.hits ),
+      ];
     },
   },
 
@@ -143,10 +164,10 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="less">
-#statistics {
-  margin: 1em;
+.charts {
+  flex-wrap: wrap;
 }
-.line {
-
+.chart-container {
+  margin-bottom: 2em;
 }
 </style>

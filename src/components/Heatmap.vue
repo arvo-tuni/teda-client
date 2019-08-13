@@ -1,5 +1,5 @@
 <template lang="pug">
-  #fixplot
+  #heatmap
     .settings(v-if="hasData")
       .field.is-horizontal
         .field.is-horizontal.one-line.stacked-horz
@@ -7,30 +7,24 @@
             label Fixation size
           .field-body
             p.control.stacked-horz.pixelsPerSecond
-              //- slider.is-primary.is-round(:min.number="5" :max.number="100" size="1.75em" v-model="pixelsPerSecond")
               vue-slider(
                 :min="5" 
-                :max="100"
-                width="140" 
+                :max="200"
+                width="240" 
                 :tooltip-formatter="pixelsPerSecondFormatter" 
                 v-model="pixelsPerSecond"
               )
-            //- p.control {{ pixelsPerSecond }}
-        .field.stacked-horz(@click="colorized = !colorized")
-          input.is-checkradio(type="checkbox" name="colorized" :checked="colorized")
-          label(for="colorized") Colorized
-          //- checkbox(v-model="colorized" label="Colorized" size="1.5em")
-
-        .field.stacked-horz(@click="showSaccades = !showSaccades")
-          input.is-checkradio(type="checkbox" name="showSaccades" :checked="showSaccades")
-          label(for="showSaccades") Saccades
-          //- checkbox(v-model="showSaccades" label="Saccades" size="1.5em")
-          
-        .field.stacked-horz(@click="keepProportions = !keepProportions")
-          input.is-checkradio(type="checkbox" name="keepProportions" :checked="keepProportions")
-          label(for="keepProportions") Keep proportions
-          //- checkbox(v-model="keepProportions" label="Keep proportions" size="1.5em")
-
+          .field-label
+            label Intensity
+          .field-body
+            p.control.stacked-horz.pixelsPerSecond
+              vue-slider(
+                :min="5" 
+                :max="800"
+                width="240" 
+                :tooltip-formatter="intensityFormatter" 
+                v-model="intensity"
+              )
       .field.has-addons.one-line
         label.stacked-horz Time range
         p.control.is-expanded
@@ -41,7 +35,9 @@
             :tooltip-formatter="timeRangeFormatter" 
           )
 
-    canvas(v-if="hasData" ref="plot" :width="canvasWidth" :height="canvasHeight")
+    .canvas-container(v-if="hasData" ref="plot" :width="canvasWidth" :height="canvasHeight")
+      canvas.static(ref="targets" :width="canvasWidth" :height="canvasHeight")
+      canvas.static(ref="heatmap" :width="canvasWidth" :height="canvasHeight")
     
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -56,14 +52,13 @@ import 'vue-slider-component/theme/default.css';
 
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
-// import Checkbox from '@/components/Checkbox.vue';
-// import Slider from '@/components/Slider.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
 import { Target, Painter } from '@/core/painter';
 import { secToTime } from '@/core/format';
+import { Heatmap } from '@/core/heatmap';
 
 import * as WebLog from '@server/web/log';
 import * as GazeEvent from '@server/tobii/gaze-event';
@@ -71,42 +66,36 @@ import { Gaze } from '@server/tobii/log';
 
 interface CompData {
   painter: Painter | null;
+  heatmap: Heatmap | null;
   meta: Defs.TrialMetaExt;
   targets: WebLog.Clickable[] | null;
   events: WebLog.TestEvent[] | null;
   fixations: Transform.Fixation[] | null;
-  // saccades: GazeEvent.Saccade[] | null;
   pixelsPerSecond: number;
-  keepProportions: boolean;
-  colorized: boolean;
-  showSaccades: boolean;
+  intensity: number;
   timeRange: number[];
   errorMessage: string;
 }
 
 export default Vue.extend({
-  name: 'fixations-plot',
+  name: 'heatmap',
 
   components: {
     Waiting,
     Message,
-    // Checkbox,
-    // Slider,
     VueSlider,
   },
 
   data() {
     return {
       painter: null,
+      heatmap: null,
       meta: new Defs.TrialMetaExt(),
       targets: null,
       events: null,
       fixations: null,
-      // saccades: null,
-      pixelsPerSecond: 30,
-      keepProportions: true,
-      colorized: true,
-      showSaccades: false,
+      pixelsPerSecond: 100,
+      intensity: 200,
       timeRange: [0, 1],
       errorMessage: '',
     } as CompData;
@@ -125,7 +114,7 @@ export default Vue.extend({
     },
 
     canvasHeight(): number {
-      if (!this.meta.contentArea.height || !this.keepProportions) {
+      if (!this.meta.contentArea.height) {
         return 576;
       }
       else {
@@ -135,7 +124,7 @@ export default Vue.extend({
     },
 
     canvasWidth(): number {
-      if (!this.meta.contentArea.width || !this.keepProportions) {
+      if (!this.meta.contentArea.width) {
         return 1024;
       }
       else {
@@ -149,6 +138,10 @@ export default Vue.extend({
 
     pixelsPerSecondFormatter(): string {
       return '{value} px/sec';
+    },
+
+    intensityFormatter(): any {
+      return (value: number) => (value / 1000).toFixed( 2 );
     },
 
     timeRangeFormatter(): any {
@@ -178,15 +171,15 @@ export default Vue.extend({
             fixations as GazeEvent.Fixation[],
             this.events as WebLog.TestEvent[],
           );
-        //   return Data.saccades( this.trial );
-        // })
-        // .then( (saccades: GazeEvent.Saccade[]) => {
-        //   this.saccades = saccades;
           return this.$nextTick();
         })
         .then( () => {
           this.timeRange = [0, Math.round( this.meta.duration / 1000 + 1 )];
-          this.drawPlot( this.$refs.plot as HTMLCanvasElement );
+          // this.loadWebGLHeatmapScript();
+        })
+        .then( () => {
+          this.drawTargets( this.$refs.targets as HTMLCanvasElement );
+          this.drawHeatmap( this.$refs.heatmap as HTMLCanvasElement );
         })
         .catch( (error: Error) => {
           this.errorMessage = 'Cannot retrieve data: '
@@ -195,7 +188,16 @@ export default Vue.extend({
         });
     },
 
-    drawPlot( canvas?: HTMLCanvasElement ) {
+    // loadWebGLHeatmapScript() {
+    //   const webGLHeatmapEl = window.document.createElement( 'script' );
+    //   webGLHeatmapEl.src = './webgl-heatmap.js';
+    //   webGLHeatmapEl.addEventListener( 'load', () => {
+    //     this.drawHeatmap( this.$refs.heatmap as HTMLCanvasElement );
+    //   });
+    //   window.document.body.appendChild( webGLHeatmapEl );
+    // },
+
+    drawTargets( canvas?: HTMLCanvasElement ) {
       if (!this.painter) {
         if (!canvas) {
           return;
@@ -209,50 +211,48 @@ export default Vue.extend({
         });
         this.painter.drawTargets( drawingTargets );
       }
+    },
+
+    drawHeatmap( canvas?: HTMLCanvasElement ) {
+      if (!this.heatmap) {
+        if (!canvas) {
+          return;
+        }
+        this.heatmap = new Heatmap( canvas, this.meta.contentArea );
+      }
 
       if (this.fixations) {
-        this.painter.drawFixPlot( this.fixations, {
+        this.heatmap.draw( this.fixations, {
           pixelsPerSecond: this.pixelsPerSecond,
-          colorized: this.colorized,
-          saccades: this.showSaccades,
+          intensity: this.intensity,
           timeRange: this.timeRange.map( item => item * 1000 ),
         });
       }
     },
 
-    updatePlot() {
-      if (!!this.painter) {
-        this.painter.reset( this.meta.contentArea );
-        this.drawPlot();
+    updateHeatmap() {
+      if (!!this.heatmap) {
+        this.heatmap.reset( this.meta.contentArea );
+        this.drawHeatmap();
       }
     },
   },
 
-  created() {
+  mounted() {
     this.loadData();
   },
 
   watch: {
     pixelsPerSecond( value: number ) {
-      this.updatePlot();
+      this.updateHeatmap();
     },
 
-    colorized( value: boolean ) {
-      this.updatePlot();
-    },
-
-    showSaccades( value: boolean ) {
-      this.updatePlot();
-    },
-
-    keepProportions( value: boolean ) {
-      this.$nextTick().then( () => {
-        this.updatePlot();
-      });
+    intensity( value: number ) {
+      this.updateHeatmap();
     },
 
     timeRange( value: number[] ) {
-      this.updatePlot();
+      this.updateHeatmap();
     },
   },
 });
@@ -260,7 +260,7 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="less">
-#fixplot {
+#heatmap {
   margin: 1em;
 }
 .stacked-horz {
@@ -271,5 +271,16 @@ export default Vue.extend({
 }
 .pixelsPerSecond {
   width: 100px;
+}
+.canvas-container {
+  position: relative;
+}
+canvas.static {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.field-body {
+  margin-right: 2em;
 }
 </style>

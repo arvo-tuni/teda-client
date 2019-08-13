@@ -47,6 +47,7 @@ export class Target {
 }
 
 export class Painter {
+  private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private scaleX: number;
   private scaleY: number;
@@ -54,7 +55,8 @@ export class Painter {
   private offsetY: number;
 
   constructor( canvas: HTMLCanvasElement, area: WebLog.ContentArea ) {
-    this.ctx = canvas.getContext( '2d' ) as CanvasRenderingContext2D;
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext( '2d' ) as CanvasRenderingContext2D;
 
     const w = area.width + AREA_EXTENSION;
     const h = area.height + AREA_EXTENSION;
@@ -70,11 +72,11 @@ export class Painter {
     const w = area.width + AREA_EXTENSION;
     const h = area.height + AREA_EXTENSION;
 
-    this.scaleX = this.ctx.canvas.width / w;
-    this.scaleY = this.ctx.canvas.height / h;
+    this.scaleX = this.canvas.width / w;
+    this.scaleY = this.canvas.height / h;
 
     this.ctx.fillStyle = '#fff';
-    this.ctx.fillRect( 0, 0, this.ctx.canvas.width, this.ctx.canvas.height );
+    this.ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
   }
 
   drawTargets( targets: Target[], options?: TargetOptions ) {
@@ -101,7 +103,6 @@ export class Painter {
   }
 
   drawFixPlot( fixations: Fixation[], options: FixPlotOptions ) {
-
     if (options.saccades) {
       this.drawSaccades( fixations, options );
     }

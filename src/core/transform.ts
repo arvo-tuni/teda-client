@@ -40,6 +40,9 @@ export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: We
 }
 
 export function getSaccades( fixations: GazeEvent.Fixation[] ): Saccade[]  {
+  // let prevFix: GazeEvent.Fixation | null = null;
+  // let prevAngle = 0;
+
   return fixations.map( fix => {
     return {
       timestamp: fix.timestamp,
@@ -47,6 +50,29 @@ export function getSaccades( fixations: GazeEvent.Fixation[] ): Saccade[]  {
       absoluteAngle: fix.absoluteSaccadicDirection,
       relativeAngle: fix.relativeSaccadicDirection,
     };
+
+    // let amplitude = fix.saccadicAmplitude;
+    // let absoluteAngle = fix.absoluteSaccadicDirection;
+    // let relativeAngle = fix.relativeSaccadicDirection;
+
+    // if (prevFix) {
+    //   const dx = fix.x - prevFix.x;
+    //   const dy = fix.y - prevFix.y;
+    //   amplitude = Math.sqrt( dx * dx + dy * dy );
+    //   absoluteAngle = angle0_360( Math.atan2( -dy, dx ) * 180 / Math.PI );
+    //   relativeAngle = angle0_360( absoluteAngle - prevAngle );
+
+    //   prevAngle = absoluteAngle;
+    // }
+
+    // prevFix = fix;
+
+    // return {
+    //   timestamp: fix.timestamp,
+    //   amplitude,
+    //   absoluteAngle,
+    //   relativeAngle,
+    // };
   });
 }
 
@@ -58,3 +84,22 @@ export function averageDuration( fixations: Fixation[] ): number {
     return fixations.reduce( (acc, fix) => acc += fix.duration, 0 ) / fixations.length;
   }
 }
+
+export function averageAmplitude( saccades: Saccade[] ): number {
+  if (saccades.length === 0) {
+    return 0;
+  }
+  else {
+    return saccades.reduce( (acc, sacc) => acc += sacc.amplitude, 0 ) / saccades.length;
+  }
+}
+
+// function angle0_360( angle: number ): number {
+//   while (angle < 0) {
+//     angle += 360;
+//   }
+//   while (angle >= 360) {
+//     angle -= 360;
+//   }
+//   return angle;
+// }

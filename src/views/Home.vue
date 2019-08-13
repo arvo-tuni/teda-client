@@ -17,6 +17,7 @@
           meta-ext(v-if="isVisualizationSelected( visualizations.meta )" :trial="trialID")
           stimuli(v-if="isVisualizationSelected( visualizations.stimuli )" :trial="trialID")
           fixations-plot(v-if="isVisualizationSelected( visualizations.fixplot )" :trial="trialID")
+          heatmap(v-if="isVisualizationSelected( visualizations.heatmap )" :trial="trialID")
           statistics(v-if="isVisualizationSelected( visualizations.statistics )" :trial="trialID")
 
     waiting(v-show="isLoading" is-modal=true is-bar=true)
@@ -34,6 +35,7 @@ import Visualizations from '@/components/Visuzalitions.vue';
 import MetaExt from '@/components/MetaExt.vue';
 import Stimuli from '@/components/Stimuli.vue';
 import FixationsPlot from '@/components/FixationsPlot.vue';
+import Heatmap from '@/components/Heatmap.vue';
 import Statistics from '@/components/Statistics.vue';
 
 import * as Data from '@/core/data';
@@ -62,6 +64,7 @@ export default Vue.extend({
     MetaExt,
     Stimuli,
     FixationsPlot,
+    Heatmap,
     Statistics,
   },
 

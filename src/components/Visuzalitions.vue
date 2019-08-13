@@ -53,7 +53,4 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="less">
-#viualizations {
-  margin: 1em;
-}
 </style>
