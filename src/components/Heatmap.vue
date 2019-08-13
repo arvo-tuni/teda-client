@@ -35,9 +35,9 @@
             :tooltip-formatter="timeRangeFormatter" 
           )
 
-    .canvas-container(v-if="hasData" ref="plot" :width="canvasWidth" :height="canvasHeight")
-      canvas.static(ref="targets" :width="canvasWidth" :height="canvasHeight")
-      canvas.static(ref="heatmap" :width="canvasWidth" :height="canvasHeight")
+    .canvas-container(v-if="hasData" :style="canvasContainerStyle")
+      canvas.static(ref="targets" :width="canvasWidth" :height="canvasHeight" :style="canvasStyle")
+      canvas.static(ref="heatmap" :width="canvasWidth" :height="canvasHeight" :style="canvasStyle")
     
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -146,6 +146,19 @@ export default Vue.extend({
 
     timeRangeFormatter(): any {
       return (value: number)  => secToTime( value );
+    },
+
+    canvasParentWidth(): number {
+      const style = window.getComputedStyle( this.$el );
+      return Number.parseFloat( style.width || '' );
+    },
+
+    canvasContainerStyle(): string {
+      return `height: ${this.canvasHeight}px`;
+    },
+
+    canvasStyle(): string {
+      return `left: ${(this.canvasParentWidth - this.canvasWidth) / 2}px`;
     },
   },
 
@@ -274,10 +287,10 @@ export default Vue.extend({
 }
 .canvas-container {
   position: relative;
+  width: 100%;
 }
 canvas.static {
   position: absolute;
-  left: 0;
   top: 0;
 }
 .field-body {
