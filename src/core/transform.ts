@@ -30,6 +30,18 @@ export class TimedVeroEvent {
   }
 }
 
+export class TimedMouseEvent {
+  timestamp: number;
+  name: string;
+  value: number;
+
+  constructor( timestamp: number, name: string, value: number ) {
+    this.timestamp = timestamp;
+    this.name = name;
+    this.value = value;
+  }
+}
+
 export interface VeroEvents {
   nav: TimedVeroEvent[];
   data: TimedVeroEvent[];
@@ -58,7 +70,7 @@ export function meta( metaExt: Defs.TrialMetaExt ): Defs.TrialMetaExt {
 }
 
 export function events( evts: WebLog.TestEvent[] ): WebLog.TestEvent[] {
-  evts/*.filter( e => e.type !== 'scroll' )*/.forEach( e => {
+  evts.forEach( e => {
     if (typeof e.timestamp === 'string') {
       e.timestamp = new Date( e.timestamp );
     }
@@ -149,7 +161,7 @@ export function averageAmplitude( data: Saccade[] ): number {
   }
 }
 
-export function veroEvents( evts: WebLog.TestEvent[], startTime: Date ): VeroEvents {
+export function vero( evts: WebLog.TestEvent[], startTime: Date ): VeroEvents {
   const start = startTime.valueOf();
 
   const nav = evts.filter( e => e.type === 'veroNavigation' ) as WebLog.TestEventVeroNav[];
@@ -168,6 +180,23 @@ export function veroEvents( evts: WebLog.TestEvent[], startTime: Date ): VeroEve
   //   ui: events.filter( e => e.type === 'uiAdjustment' ) as WebLog.TestEventVeroUI[],
   // };
 }
+
+export function clicks( evts: WebLog.TestEvent[], startTime: Date ): TimedMouseEvent[] {
+  const start = startTime.valueOf();
+
+  const clicks = evts.filter( e => e.type === 'clicked' ) as WebLog.TestEventClicked[];
+
+  return clicks.map( item => new TimedMouseEvent( item.timestamp.valueOf() - start, 'click', item.index ) );
+}
+
+export function scrolls( evts: WebLog.TestEvent[], startTime: Date ): TimedMouseEvent[] {
+  const start = startTime.valueOf();
+
+  const clicks = evts.filter( e => e.type === 'scroll' ) as WebLog.TestEventScroll[];
+
+  return clicks.map( item => new TimedMouseEvent( item.timestamp.valueOf() - start, 'scroll', item.position ) );
+}
+
 
 // function angle0_360( angle: number ): number {
 //   while (angle < 0) {

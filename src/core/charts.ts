@@ -85,7 +85,12 @@ export function hits( el: HTMLCanvasElement, data: any[] ) {
   });
 }
 
-export function vero( el: HTMLCanvasElement, events: Transform.VeroEvents ) {
+export function vero( 
+  el: HTMLCanvasElement, 
+  events: Transform.VeroEvents, 
+  clicks: Transform.TimedMouseEvent[],  
+  scrolls: Transform.TimedMouseEvent[],  
+) {
   const datasets: Chart.ChartDataSets[] = [];
 
   Object.keys( VERO_DATATYPES ).forEach( (key, index) => {
@@ -107,6 +112,36 @@ export function vero( el: HTMLCanvasElement, events: Transform.VeroEvents ) {
     });
   });
 
+  if (clicks.length > 0) {
+    datasets.push({
+      label: 'clicks',
+      pointRadius: 7,
+      pointHoverRadius: 9,
+      showLine: false,
+      data: clicks.map( item => { return {
+        x: item.timestamp / 1000,
+        y: 0,
+        value: item.value,
+      }; }),
+      backgroundColor: BG_PRIMARY_LIGHT,
+    });
+  }
+
+  if (scrolls.length > 0) {
+    datasets.push({
+      label: 'scrolls',
+      pointRadius: 7,
+      pointHoverRadius: 9,
+      showLine: false,
+      data: scrolls.map( item => { return {
+        x: item.timestamp / 1000,
+        y: 4,
+        value: item.value,
+      }; }),
+      backgroundColor: BG_PRIMARY_LIGHT,
+    });
+  }
+
   return new Chart( el, {
     type: 'scatter',
     data: {
@@ -120,8 +155,86 @@ export function vero( el: HTMLCanvasElement, events: Transform.VeroEvents ) {
             const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
             const values = dataset.data as VeroData[];
             const { name, value } = values[ tooltipItem.index || 0];
-            const valStr = value ? `= [${value}]` : '';
-            return `${dataset.label}: "${name}" ${valStr} at ${Format.secToTime( +(tooltipItem.label as string) )}`;
+            const nameStr = name ? ` "${name}"` : '';
+            const valStr = value !== undefined ? ` = [${value}]` : '';
+            return `${dataset.label}:${nameStr}${valStr}, ${Format.secToTime( +(tooltipItem.label as string) )}`;
+          },
+        },
+      },
+      scales: {
+        xAxes: [{
+          ticks: {
+            beginAtZero: true,
+            callback: value => Format.secToTime( value ),
+          },
+        }],
+        yAxes: [{
+          ticks: {
+            min: -0.5,
+            max: 4.5,
+            stepSize: 1,
+            callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label as string : '',
+          },
+        }],
+      },
+    },
+  });
+}
+
+export function mouse( 
+  el: HTMLCanvasElement, 
+  clicks: Transform.TimedMouseEvent[],  
+  scrolls: Transform.TimedMouseEvent[],  
+) {
+  const datasets: Chart.ChartDataSets[] = [];
+
+  console.log(clicks.length);
+  if (clicks.length > 0) {
+    datasets.push({
+      label: 'clicks',
+      pointRadius: 7,
+      pointHoverRadius: 9,
+      showLine: false,
+      data: clicks.map( item => { return {
+        x: item.timestamp / 1000,
+        y: 1,
+        value: item.value,
+      }; }),
+      backgroundColor: BG_PRIMARY_LIGHT,
+    });
+  }
+
+  if (scrolls.length > 0) {
+    datasets.push({
+      label: 'scrolls',
+      pointRadius: 7,
+      pointHoverRadius: 9,
+      showLine: false,
+      data: scrolls.map( item => { return {
+        x: item.timestamp / 1000,
+        y: 2,
+        value: item.value,
+      }; }),
+      backgroundColor: BG_PRIMARY_LIGHT,
+    });
+  }
+
+  return new Chart( el, {
+    type: 'scatter',
+    data: {
+      labels: (datasets[0].data as Chart.ChartData[]).map( _ => '' ),
+      datasets,
+    },
+    options: {
+      tooltips: {
+        callbacks: {
+          label: (tooltipItem, data) => {
+            const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
+            const values = dataset.data as VeroData[];
+            const { name, value } = values[ tooltipItem.index || 0];
+            const nameStr = name ? ` "${name}"` : '';
+            const valStr = value !== undefined ? ` = [${value}]` : '';
+            return `${dataset.label}:${nameStr}${valStr}, ${Format.secToTime( +(tooltipItem.label as string) )}`;
           },
         },
       },
@@ -135,7 +248,7 @@ export function vero( el: HTMLCanvasElement, events: Transform.VeroEvents ) {
         yAxes: [{
           ticks: {
             min: 0,
-            max: 4,
+            max: 3,
             stepSize: 1,
             callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label as string : '',
           },

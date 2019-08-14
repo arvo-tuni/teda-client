@@ -33,6 +33,9 @@
           .chart-container(v-if="hasVero")
             h5.title.is-5 Vero, timeline
             canvas(ref="vero" width="640" height="320")
+          .chart-container(v-else-if="hasMouse")
+            h5.title.is-5 Mouse, timeline
+            canvas(ref="mouse" width="640" height="320")
 
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -62,6 +65,8 @@ interface CompData {
   saccades: Transform.Saccade[];
   hits: number[] | WebLog.WrongAndCorrect[];
   vero: Transform.VeroEvents;
+  clicks: Transform.TimedMouseEvent[],
+  scrolls: Transform.TimedMouseEvent[],
   errorMessage: string;
   charts: Chart[];
 }
@@ -88,6 +93,8 @@ export default Vue.extend({
         data: [],
         ui: [],
       },
+      clicks: [],
+      scrolls: [],
       errorMessage: '',
       charts: [],
     } as CompData;
@@ -110,6 +117,9 @@ export default Vue.extend({
     hasVero(): boolean {
       return this.vero.nav.length > 0 || this.vero.data.length > 0 || this.vero.ui.length > 0;
     },
+    hasMouse(): boolean {
+      return this.clicks.length > 0 || this.scrolls.length > 0;
+    },
   },
 
   methods: {
@@ -131,7 +141,9 @@ export default Vue.extend({
         })
         .then( (events: WebLog.TestEvent[]) => {
           this.events = Transform.events( events );
-          this.vero = Transform.veroEvents( events, this.meta.startTime );
+          this.clicks = Transform.clicks( this.events, this.meta.startTime );
+          this.scrolls = Transform.scrolls( this.events, this.meta.startTime );
+          this.vero = Transform.vero( events, this.meta.startTime );
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {
@@ -175,7 +187,20 @@ export default Vue.extend({
       }
 
       if (this.hasVero) {
-        this.charts.push( Charts.vero( this.$refs.vero as HTMLCanvasElement, this.vero ) );
+        this.charts.push( Charts.vero( 
+          this.$refs.vero as HTMLCanvasElement, 
+          this.vero, 
+          this.clicks,
+          this.scrolls,
+        ) );
+      }
+
+      if (this.hasMouse) {
+        this.charts.push( Charts.mouse( 
+          this.$refs.mouse as HTMLCanvasElement, 
+          this.clicks,
+          this.scrolls,
+        ) );
       }
     },
   },
