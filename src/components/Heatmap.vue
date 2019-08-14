@@ -170,7 +170,7 @@ export default Vue.extend({
 
       Data.meta( this.trial )
         .then( (meta: Defs.TrialMetaExt) => {
-          this.meta = meta;
+          this.meta = Transform.meta( meta );
           return Data.targets( this.trial );
         })
         .then( (targets: WebLog.Clickable[]) => {
@@ -178,7 +178,7 @@ export default Vue.extend({
           return Data.events( this.trial );
         })
         .then( (events: WebLog.TestEvent[]) => {
-          this.events = events;
+          this.events = Transform.events( events );
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {

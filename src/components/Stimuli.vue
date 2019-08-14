@@ -15,6 +15,7 @@ import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
+import * as Transform from '@/core/transform';
 import { Target, Painter } from '@/core/painter';
 
 import * as WebLog from '@server/web/log';
@@ -64,7 +65,7 @@ export default Vue.extend({
 
       Data.meta( this.trial )
         .then( (meta: Defs.TrialMetaExt) => {
-          this.meta = meta;
+          this.meta = Transform.meta( meta );
           return Data.targets( this.trial );
         })
         .then( (targets: WebLog.Clickable[]) => {

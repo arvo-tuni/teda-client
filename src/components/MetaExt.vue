@@ -1,44 +1,44 @@
 <template lang="pug">
   #meta
-    template(v-if="properties")
+    template(v-if="meta")
       section.section
-        h3.title.is-3 {{ subject }} completing "{{ properties.type }}"
-        .subProperty Started at {{ formatDate( properties.startTime ) }}, ended at {{ formatDate( properties.endTime ) }} (duration is {{ toTime( properties.duration ) }})
-        .subProperty Window: {{ properties.windowWidth }} x {{ properties.windowHeight }} (document height is {{ properties.windowHeight }})
-        .subProperty(v-if="properties.contentArea") Area: {{ formatArea( properties.contentArea ) }}
+        h3.title.is-3 {{ subject }} completing "{{ meta.type }}"
+        .subProperty Started at {{ formatDate( meta.startTime ) }}, ended at {{ formatDate( meta.endTime ) }} (duration is {{ toTime( meta.duration ) }})
+        .subProperty Window: {{ meta.windowWidth }} x {{ meta.windowHeight }} (document height is {{ meta.windowHeight }})
+        .subProperty(v-if="meta.contentArea") Area: {{ formatArea( meta.contentArea ) }}
 
-      section.section(v-if="properties.settings")
+      section.section(v-if="meta.settings")
         h5.title.is-5 Settings: 
-        .property Duration: {{ properties.settings.duration }} seconds
-        .property Content width: {{ properties.settings.contentWidth }}
-        .property Content left {{ properties.settings.contentLeft }}
-        .property Font: {{ properties.settings.fontSize }} pt
-        template(v-if="properties.settings.wordSpacing !== undefined")
-          .property Word spacing: {{ properties.settings.wordSpacing }}
-          .property Text color: {{ properties.settings.foreground }}
-          .property Page color: {{ properties.settings.background }}
-          .property Cursor: {{ properties.settings.cursor }}
-          .property Letter spacing: {{ properties.settings.letterSpacing }}
-          .property Line height: {{ properties.settings.lineHeight }}
+        .property Duration: {{ meta.settings.duration }} seconds
+        .property Content width: {{ meta.settings.contentWidth }}
+        .property Content left {{ meta.settings.contentLeft }}
+        .property Font: {{ meta.settings.fontSize }} pt
+        template(v-if="meta.settings.wordSpacing !== undefined")
+          .property Word spacing: {{ meta.settings.wordSpacing }}
+          .property Text color: {{ meta.settings.foreground }}
+          .property Page color: {{ meta.settings.background }}
+          .property Cursor: {{ meta.settings.cursor }}
+          .property Letter spacing: {{ meta.settings.letterSpacing }}
+          .property Line height: {{ meta.settings.lineHeight }}
 
       section.section
         h5.title.is-5 Instruction: 
-        .property {{ properties.instruction }}
+        .property {{ meta.instruction }}
 
       section.section
         h5.title.is-5 Summary: 
-        .property marked total: {{ properties.marks }}
-        .property(v-if="properties.marksWrong !== undefined") marked incorrectly: {{ properties.marksWrong }}
-        .property missed: {{ properties.misses }}
-        .property scrolls: {{ properties.scrolls }}
-        .property scrolled to: {{ properties.maxScroll }}
+        .property marked total: {{ meta.marks }}
+        .property(v-if="meta.marksWrong !== undefined") marked incorrectly: {{ meta.marksWrong }}
+        .property missed: {{ meta.misses }}
+        .property scrolls: {{ meta.scrolls }}
+        .property scrolled to: {{ meta.maxScroll }}
 
-      section.section(v-if="properties.headTotals") 
+      section.section(v-if="meta.headTotals") 
         h5.title.is-5 Head observations
-        .property Roll: {{ formarHeadData( properties.headTotals.roll ) }};
-        .property Pitch: {{ formarHeadData( properties.headTotals.pitch ) }};
-        .property Heading: {{ formarHeadData( properties.headTotals.heading ) }};
-        .property Movement: {{ formarHeadData( properties.headTotals.movement ) }};
+        .property Roll: {{ formarHeadData( meta.headTotals.roll ) }};
+        .property Pitch: {{ formarHeadData( meta.headTotals.pitch ) }};
+        .property Heading: {{ formarHeadData( meta.headTotals.heading ) }};
+        .property Movement: {{ formarHeadData( meta.headTotals.movement ) }};
 
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -54,12 +54,13 @@ import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
+import * as Transform from '@/core/transform';
 import { twoDigits, treeDigits, secToTime, toDate} from '@/core/format';
 
 import * as WebLog from '@server/web/log';
 
 interface CompData {
-  properties: Defs.TrialMetaExt;
+  meta: Defs.TrialMetaExt;
   errorMessage: string;
 }
 
@@ -73,7 +74,7 @@ export default Vue.extend({
 
   data() {
     return {
-      properties: new Defs.TrialMetaExt(),
+      meta: new Defs.TrialMetaExt(),
       errorMessage: '',
     } as CompData;
   },
@@ -87,7 +88,7 @@ export default Vue.extend({
 
   computed: {
     subject(): string {
-      return this.properties.participantCode ? this.properties.participantCode : 'Someone';
+      return this.meta.participantCode ? this.meta.participantCode : 'Someone';
     },
   },
 
@@ -114,8 +115,8 @@ export default Vue.extend({
       this.errorMessage = '';
 
       Data.meta( this.trial )
-        .then( (metaExt: Defs.TrialMetaExt) => {
-          this.properties = metaExt;
+        .then( (meta: Defs.TrialMetaExt) => {
+          this.meta = Transform.meta( meta );
         })
         .catch( (error: Error) => {
           this.errorMessage = 'Cannot retrieve data: '

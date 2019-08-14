@@ -109,7 +109,7 @@ export class Painter {
     const startTime = fixations[0].timestamp.RecordingTimestamp;                        // first fixation
     const duration = fixations.slice( -1 )[0].timestamp.RecordingTimestamp - startTime; // last fixation
 
-    fixations.forEach( fix => {
+    fixations.forEach( (fix, i) => {
       const ts = fix.timestamp.RecordingTimestamp - startTime;
       if (options.timeRange && (ts < options.timeRange[0] || ts > options.timeRange[1])) {
         return;

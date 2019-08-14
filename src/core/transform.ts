@@ -36,6 +36,16 @@ export interface VeroEvents {
   ui: TimedVeroEvent[];
 }
 
+export function trials( data: Defs.TrialMeta[] ): Defs.TrialMeta[] {
+  data.forEach( item => {
+    if (typeof item.timestamp === 'string') {
+      item.timestamp = new Date( item.timestamp );
+    }
+  })
+
+  return data;
+}
+
 export function meta( metaExt: Defs.TrialMetaExt ): Defs.TrialMetaExt {
   if (typeof metaExt.startTime === 'string') {
     metaExt.startTime = new Date( metaExt.startTime );
@@ -48,7 +58,7 @@ export function meta( metaExt: Defs.TrialMetaExt ): Defs.TrialMetaExt {
 }
 
 export function events( evts: WebLog.TestEvent[] ): WebLog.TestEvent[] {
-  evts.forEach( e => {
+  evts/*.filter( e => e.type !== 'scroll' )*/.forEach( e => {
     if (typeof e.timestamp === 'string') {
       e.timestamp = new Date( e.timestamp );
     }
@@ -69,6 +79,10 @@ export function fixations( data: GazeEvent.Fixation[], evts: WebLog.TestEvent[] 
     while (nextScroll && nextScroll.timestamp < fix.timestamp.LocalTimeStamp) {
       scrollPosition = nextScroll.position;
       nextScroll = scrollIndex < scrolls.length ? scrolls[ scrollIndex++ ] : null;
+    }
+
+    if (typeof fix.timestamp.LocalTimeStamp === 'string') {
+      fix.timestamp.LocalTimeStamp = new Date( fix.timestamp.LocalTimeStamp );
     }
 
     return {
@@ -122,7 +136,7 @@ export function averageDuration( data: Fixation[] ): number {
     return 0;
   }
   else {
-    return data.reduce( (acc, fix) => acc += fix.duration, 0 ) / fixations.length;
+    return data.reduce( (acc, fix) => acc += fix.duration, 0 ) / data.length;
   }
 }
 
@@ -131,7 +145,7 @@ export function averageAmplitude( data: Saccade[] ): number {
     return 0;
   }
   else {
-    return data.reduce( (acc, sacc) => acc += sacc.amplitude, 0 ) / saccades.length;
+    return data.reduce( (acc, sacc) => acc += sacc.amplitude, 0 ) / data.length;
   }
 }
 

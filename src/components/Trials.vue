@@ -21,6 +21,7 @@ import Vue from 'vue';
 
 import * as Data from '@/core/data';
 import * as Defs from '@/core/decl';
+import * as Transform from '@/core/transform';
 import { toDate } from '@/core/format';
 
 interface CompData {
@@ -58,7 +59,7 @@ export default Vue.extend({
   created() {
     Data.trials()
       .then( (trials: Defs.TrialMeta[]) => {
-        this.trials = trials;
+        this.trials = Transform.trials( trials );
       });
   },
 });
