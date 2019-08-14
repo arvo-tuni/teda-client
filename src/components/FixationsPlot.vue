@@ -69,6 +69,8 @@ import * as WebLog from '@server/web/log';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Gaze } from '@server/tobii/log';
 
+const MAX_CANVAS_WIDTH = 1024;
+
 interface CompData {
   painter: Painter | null;
   meta: Defs.TrialMetaExt;
@@ -139,7 +141,7 @@ export default Vue.extend({
         return 1024;
       }
       else {
-        return this.meta.contentArea.width ? this.meta.contentArea.width : 1024;
+        return Math.min( this.meta.contentArea.width, MAX_CANVAS_WIDTH );
       }
     },
 
@@ -174,7 +176,7 @@ export default Vue.extend({
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {
-          this.fixations = Transform.toScrolledFixations(
+          this.fixations = Transform.fixations(
             fixations as GazeEvent.Fixation[],
             this.events as WebLog.TestEvent[],
           );

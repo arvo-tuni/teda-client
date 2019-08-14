@@ -23,12 +23,7 @@ export class Heatmap {
   constructor( canvas: HTMLCanvasElement, area: WebLog.ContentArea ) {
     this.canvas = canvas;
 
-    try {
-      this.heatmap = createWebGLHeatmap({ canvas: this.canvas });
-    }
-    catch (error) {
-      console.error( error );
-    }
+    this.heatmap = createWebGLHeatmap({ canvas: this.canvas });
 
     const w = area.width + AREA_EXTENSION;
     const h = area.height + AREA_EXTENSION;

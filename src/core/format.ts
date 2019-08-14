@@ -46,8 +46,8 @@ export function secToTime( duration: number ): string {
   return comps.reverse().map( c => twoDigits( c ) ).join( ':' );
 }
 
-export function toDate( value: string ) {
-  const d = new Date( value );
+export function toDate( value: string | Date ) {
+  const d = typeof value === 'string' ? new Date( value ) : value;
 
   const yyyymmdd = [
     twoDigits(d.getDate()),

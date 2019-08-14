@@ -22,6 +22,37 @@ interface SaccDirections {
   other: number;
 }
 
+interface VeroData extends Chart.ChartData {
+  name: string;
+  value: string;
+}
+
+interface VeroDatatype {
+  name: string;
+  color: string;
+}
+
+interface VeroDatatypes {
+  [key: string]: {
+    name: string,
+    color: string,
+  };
+}
+const VERO_DATATYPES: VeroDatatypes = {
+  nav: {
+    name: 'navigate',
+    color: BG_PRIMARY,
+  },
+  data: {
+    name: 'data',
+    color: BG_SUCCESS,
+  },
+  ui: {
+    name: 'UI',
+    color: BG_DANGER,
+  },
+};
+
 export function hits( el: HTMLCanvasElement, data: any[] ) {
   const datasets: Array<{data: number[], label: string, backgroundColor: string}> = [];
 
@@ -50,6 +81,66 @@ export function hits( el: HTMLCanvasElement, data: any[] ) {
     data: {
       labels: datasets[0].data.map( (val: number, index: number) => `${(index + 1) * 10}%` ),
       datasets,
+    },
+  });
+}
+
+export function vero( el: HTMLCanvasElement, events: Transform.VeroEvents ) {
+  const datasets: Chart.ChartDataSets[] = [];
+
+  Object.keys( VERO_DATATYPES ).forEach( (key, index) => {
+    const datatype = VERO_DATATYPES[ key ] as VeroDatatype;
+    const ev = (events as any)[ key ] as Transform.TimedVeroEvent[];
+
+    datasets.push({
+      label: datatype.name,
+      pointRadius: 7,
+      pointHoverRadius: 9,
+      showLine: false,
+      data: ev.map( item => { return {
+        x: item.timestamp / 1000,
+        y: index + 1,
+        name: item.name,
+        value: item.value,
+      }; }),
+      backgroundColor: datatype.color,
+    });
+  });
+
+  return new Chart( el, {
+    type: 'scatter',
+    data: {
+      labels: (datasets[0].data as Chart.ChartData[]).map( _ => '' ),
+      datasets,
+    },
+    options: {
+      tooltips: {
+        callbacks: {
+          label: (tooltipItem, data) => {
+            const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
+            const values = dataset.data as VeroData[];
+            const { name, value } = values[ tooltipItem.index || 0];
+            const valStr = value ? `= [${value}]` : '';
+            return `${dataset.label}: "${name}" ${valStr} at ${Format.secToTime( +(tooltipItem.label as string) )}`;
+          },
+        },
+      },
+      scales: {
+        xAxes: [{
+          ticks: {
+            beginAtZero: true,
+            callback: value => Format.secToTime( value ),
+          },
+        }],
+        yAxes: [{
+          ticks: {
+            min: 0,
+            max: 4,
+            stepSize: 1,
+            callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label as string : '',
+          },
+        }],
+      },
     },
   });
 }

@@ -24,12 +24,15 @@
           .chart-container
             h5.title.is-5 Average amplitude
             canvas(ref="saccadeAmplitudeTime" width="640" height="320")
-      section.section(v-if="hasHits")
+      section.section
         h3.title.is-3 Results
         .charts.is-flex
-          .chart-container
+          .chart-container(v-if="hasHits")
             h5.title.is-5 Hits histogram
             canvas(ref="hits" width="640" height="320")
+          .chart-container(v-if="hasVero")
+            h5.title.is-5 Vero, timeline
+            canvas(ref="vero" width="640" height="320")
 
     message(v-else-if="errorMessage" type="error" :message="errorMessage" @closed="loadData()")
 
@@ -58,6 +61,7 @@ interface CompData {
   fixations: Transform.Fixation[];
   saccades: Transform.Saccade[];
   hits: number[] | WebLog.WrongAndCorrect[];
+  vero: Transform.VeroEvents;
   errorMessage: string;
   charts: Chart[];
 }
@@ -79,6 +83,11 @@ export default Vue.extend({
       fixations: [],
       saccades: [],
       hits: [],
+      vero: {
+        nav: [],
+        data: [],
+        ui: [],
+      },
       errorMessage: '',
       charts: [],
     } as CompData;
@@ -96,7 +105,10 @@ export default Vue.extend({
       return this.fixations.length > 0;
     },
     hasHits(): boolean {
-      return this.hits.length > 0;
+      return this.hits.length > 1;
+    },
+    hasVero(): boolean {
+      return this.vero.nav.length > 0 || this.vero.data.length > 0 || this.vero.ui.length > 0;
     },
   },
 
@@ -106,7 +118,7 @@ export default Vue.extend({
 
       Data.meta( this.trial )
         .then( (meta: Defs.TrialMetaExt) => {
-          this.meta = meta;
+          this.meta = Transform.meta( meta );
           return Data.targets( this.trial );
         })
         .then( (targets: WebLog.Clickable[]) => {
@@ -118,15 +130,16 @@ export default Vue.extend({
           return Data.events( this.trial );
         })
         .then( (events: WebLog.TestEvent[]) => {
-          this.events = events;
+          this.events = Transform.events( events );
+          this.vero = Transform.veroEvents( events, this.meta.startTime );
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {
-          this.fixations = Transform.toScrolledFixations(
+          this.fixations = Transform.fixations(
             fixations as GazeEvent.Fixation[],
             this.events as WebLog.TestEvent[],
           );
-          this.saccades = Transform.getSaccades( fixations );
+          this.saccades = Transform.saccades( fixations );
           return this.$nextTick();
         })
         .then( () => {
@@ -144,15 +157,26 @@ export default Vue.extend({
     },
 
     createCharts() {
-      this.charts = [
-        Charts.fixDurationsRange( this.$refs.fixDurationsRange as HTMLCanvasElement, this.fixations ),
-        Charts.fixDurationsTime( this.$refs.fixDurationsTime as HTMLCanvasElement, this.fixations ),
-        Charts.saccadeDirections( this.$refs.saccadeDirections as HTMLCanvasElement, this.saccades ),
-        Charts.saccadeDirectionRadar( this.$refs.saccadeDirectionRadar as HTMLCanvasElement, this.saccades ),
-        Charts.saccadeAmplitudeRange( this.$refs.saccadeAmplitudeRange as HTMLCanvasElement, this.saccades ),
-        Charts.saccadeAmplitudeTime( this.$refs.saccadeAmplitudeTime as HTMLCanvasElement, this.saccades ),
-        Charts.hits( this.$refs.hits as HTMLCanvasElement, this.hits ),
-      ];
+      this.charts = [];
+
+      if (this.hasFixations) {
+        this.charts.push(
+          Charts.fixDurationsRange( this.$refs.fixDurationsRange as HTMLCanvasElement, this.fixations ),
+          Charts.fixDurationsTime( this.$refs.fixDurationsTime as HTMLCanvasElement, this.fixations ),
+          Charts.saccadeDirections( this.$refs.saccadeDirections as HTMLCanvasElement, this.saccades ),
+          Charts.saccadeDirectionRadar( this.$refs.saccadeDirectionRadar as HTMLCanvasElement, this.saccades ),
+          Charts.saccadeAmplitudeRange( this.$refs.saccadeAmplitudeRange as HTMLCanvasElement, this.saccades ),
+          Charts.saccadeAmplitudeTime( this.$refs.saccadeAmplitudeTime as HTMLCanvasElement, this.saccades ),
+        );
+      }
+
+      if (this.hasHits) {
+        this.charts.push( Charts.hits( this.$refs.hits as HTMLCanvasElement, this.hits ) );
+      }
+
+      if (this.hasVero) {
+        this.charts.push( Charts.vero( this.$refs.vero as HTMLCanvasElement, this.vero ) );
+      }
     },
   },
 

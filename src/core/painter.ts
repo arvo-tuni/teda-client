@@ -7,7 +7,7 @@ const TARGET_BORDER_COLOR = '#666';
 const TARGET_CLICKED_OK_COLOR = '#8cf';
 const TARGET_CLICKED_WRONG_COLOR = '#fc8';
 const TARGET_UNCLICKED_COLOR = '#eee';
-const SACCADE_COLOR = '#888';
+const SACCADE_COLOR = '#ccc';
 const FIX_BORDER_COLOR = '#666';
 const FIX_FILL_SATURATION = '80'; // %
 const FIX_FILL_LIGHTNESS = '80'; // %
@@ -49,8 +49,8 @@ export class Target {
 export class Painter {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  private scaleX: number;
-  private scaleY: number;
+  private scaleX: number = 1;
+  private scaleY: number = 1;
   private offsetX: number;
   private offsetY: number;
 
@@ -58,11 +58,7 @@ export class Painter {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext( '2d' ) as CanvasRenderingContext2D;
 
-    const w = area.width + AREA_EXTENSION;
-    const h = area.height + AREA_EXTENSION;
-
-    this.scaleX = canvas.width / w;
-    this.scaleY = canvas.height / h;
+    this.reset( area );
 
     this.offsetX = area.left - AREA_EXTENSION / 2;
     this.offsetY = area.top - AREA_EXTENSION / 2;

@@ -1,3 +1,5 @@
+import * as Defs from '@/core/decl';
+
 import * as WebLog from '@server/web/log';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Timestamp } from '@server/tobii/log';
@@ -16,14 +18,53 @@ export interface Saccade {
   relativeAngle: number;
 }
 
-export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: WebLog.TestEvent[] ): Fixation[]  {
-  const scrolls = events.filter( event => event.type === 'scroll' ) as WebLog.TestEventScroll[];
+export class TimedVeroEvent {
+  timestamp: number;
+  name: string;
+  value: string;
+
+  constructor( timestamp: number, name: string, value: string ) {
+    this.timestamp = timestamp;
+    this.name = name;
+    this.value = value;
+  }
+}
+
+export interface VeroEvents {
+  nav: TimedVeroEvent[];
+  data: TimedVeroEvent[];
+  ui: TimedVeroEvent[];
+}
+
+export function meta( metaExt: Defs.TrialMetaExt ): Defs.TrialMetaExt {
+  if (typeof metaExt.startTime === 'string') {
+    metaExt.startTime = new Date( metaExt.startTime );
+  }
+  if (typeof metaExt.endTime === 'string') {
+    metaExt.endTime = new Date( metaExt.endTime );
+  }
+
+  return metaExt;
+}
+
+export function events( evts: WebLog.TestEvent[] ): WebLog.TestEvent[] {
+  evts.forEach( e => {
+    if (typeof e.timestamp === 'string') {
+      e.timestamp = new Date( e.timestamp );
+    }
+  });
+
+  return evts;
+}
+
+export function fixations( data: GazeEvent.Fixation[], evts: WebLog.TestEvent[] ): Fixation[]  {
+  const scrolls = evts.filter( event => event.type === 'scroll' ) as WebLog.TestEventScroll[];
 
   let scrollPosition = 0;
   let nextScroll: WebLog.TestEventScroll | null = scrolls.length > 0 ? scrolls[0] : null;
   let scrollIndex = 1;
 
-  return fixations.map( fix => {
+  return data.map( fix => {
 
     while (nextScroll && nextScroll.timestamp < fix.timestamp.LocalTimeStamp) {
       scrollPosition = nextScroll.position;
@@ -39,11 +80,11 @@ export function toScrolledFixations( fixations: GazeEvent.Fixation[], events: We
   });
 }
 
-export function getSaccades( fixations: GazeEvent.Fixation[] ): Saccade[]  {
+export function saccades( data: GazeEvent.Fixation[] ): Saccade[]  {
   // let prevFix: GazeEvent.Fixation | null = null;
   // let prevAngle = 0;
 
-  return fixations.map( fix => {
+  return data.map( fix => {
     return {
       timestamp: fix.timestamp,
       amplitude: fix.saccadicAmplitude,
@@ -76,22 +117,42 @@ export function getSaccades( fixations: GazeEvent.Fixation[] ): Saccade[]  {
   });
 }
 
-export function averageDuration( fixations: Fixation[] ): number {
-  if (fixations.length === 0) {
+export function averageDuration( data: Fixation[] ): number {
+  if (data.length === 0) {
     return 0;
   }
   else {
-    return fixations.reduce( (acc, fix) => acc += fix.duration, 0 ) / fixations.length;
+    return data.reduce( (acc, fix) => acc += fix.duration, 0 ) / fixations.length;
   }
 }
 
-export function averageAmplitude( saccades: Saccade[] ): number {
-  if (saccades.length === 0) {
+export function averageAmplitude( data: Saccade[] ): number {
+  if (data.length === 0) {
     return 0;
   }
   else {
-    return saccades.reduce( (acc, sacc) => acc += sacc.amplitude, 0 ) / saccades.length;
+    return data.reduce( (acc, sacc) => acc += sacc.amplitude, 0 ) / saccades.length;
   }
+}
+
+export function veroEvents( evts: WebLog.TestEvent[], startTime: Date ): VeroEvents {
+  const start = startTime.valueOf();
+
+  const nav = evts.filter( e => e.type === 'veroNavigation' ) as WebLog.TestEventVeroNav[];
+  const data = evts.filter( e => e.type === 'veroNavigationData' ) as WebLog.TestEventVeroNavData[];
+  const ui = evts.filter( e => e.type === 'uiAdjustment' ) as WebLog.TestEventVeroUI[];
+
+  return {
+    nav: nav.map( item => new TimedVeroEvent( item.timestamp.valueOf() - start, item.target, '' ) ),
+    data: data.map( item => new TimedVeroEvent( item.timestamp.valueOf() - start, item.variable, item.value ) ),
+    ui: ui.map( item => new TimedVeroEvent( item.timestamp.valueOf() - start, item.target, item.enable ) ),
+  };
+
+  // return {
+  //   nav: events.filter( e => e.type === 'veroNavigation' ) as WebLog.TestEventVeroNav[],
+  //   data: events.filter( e => e.type === 'veroNavigationData' ) as WebLog.TestEventVeroNavData[],
+  //   ui: events.filter( e => e.type === 'uiAdjustment' ) as WebLog.TestEventVeroUI[],
+  // };
 }
 
 // function angle0_360( angle: number ): number {
