@@ -85,11 +85,11 @@ export function hits( el: HTMLCanvasElement, data: any[] ) {
   });
 }
 
-export function vero( 
-  el: HTMLCanvasElement, 
-  events: Transform.VeroEvents, 
-  clicks: Transform.TimedMouseEvent[],  
-  scrolls: Transform.TimedMouseEvent[],  
+export function vero(
+  el: HTMLCanvasElement,
+  events: Transform.VeroEvents,
+  clicks: Transform.TimedMouseEvent[],
+  scrolls: Transform.TimedMouseEvent[],
 ) {
   const datasets: Chart.ChartDataSets[] = [];
 
@@ -181,14 +181,13 @@ export function vero(
   });
 }
 
-export function mouse( 
-  el: HTMLCanvasElement, 
-  clicks: Transform.TimedMouseEvent[],  
-  scrolls: Transform.TimedMouseEvent[],  
+export function mouse(
+  el: HTMLCanvasElement,
+  clicks: Transform.TimedMouseEvent[],
+  scrolls: Transform.TimedMouseEvent[],
 ) {
   const datasets: Chart.ChartDataSets[] = [];
 
-  console.log(clicks.length);
   if (clicks.length > 0) {
     datasets.push({
       label: 'clicks',
@@ -231,10 +230,9 @@ export function mouse(
           label: (tooltipItem, data) => {
             const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
             const values = dataset.data as VeroData[];
-            const { name, value } = values[ tooltipItem.index || 0];
-            const nameStr = name ? ` "${name}"` : '';
-            const valStr = value !== undefined ? ` = [${value}]` : '';
-            return `${dataset.label}:${nameStr}${valStr}, ${Format.secToTime( +(tooltipItem.label as string) )}`;
+            const { value } = values[ tooltipItem.index || 0];
+            const valStr = value !== undefined ? ` "${value}",` : '';
+            return `${dataset.label}:${valStr} ${Format.secToTime( +(tooltipItem.label as string) )}`;
           },
         },
       },

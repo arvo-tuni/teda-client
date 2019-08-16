@@ -65,8 +65,8 @@ interface CompData {
   saccades: Transform.Saccade[];
   hits: number[] | WebLog.WrongAndCorrect[];
   vero: Transform.VeroEvents;
-  clicks: Transform.TimedMouseEvent[],
-  scrolls: Transform.TimedMouseEvent[],
+  clicks: Transform.TimedMouseEvent[];
+  scrolls: Transform.TimedMouseEvent[];
   errorMessage: string;
   charts: Chart[];
 }
@@ -187,17 +187,17 @@ export default Vue.extend({
       }
 
       if (this.hasVero) {
-        this.charts.push( Charts.vero( 
-          this.$refs.vero as HTMLCanvasElement, 
-          this.vero, 
+        this.charts.push( Charts.vero(
+          this.$refs.vero as HTMLCanvasElement,
+          this.vero,
           this.clicks,
           this.scrolls,
         ) );
       }
 
       if (this.hasMouse) {
-        this.charts.push( Charts.mouse( 
-          this.$refs.mouse as HTMLCanvasElement, 
+        this.charts.push( Charts.mouse(
+          this.$refs.mouse as HTMLCanvasElement,
           this.clicks,
           this.scrolls,
         ) );

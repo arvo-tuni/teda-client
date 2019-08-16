@@ -105,10 +105,10 @@ export default Vue.extend({
       events: null,
       fixations: null,
       // saccades: null,
-      pixelsPerSecond: 30,
-      keepProportions: true,
-      colorized: true,
-      showSaccades: false,
+      pixelsPerSecond: this.$ls.get( 'fixplot_pixelsPerSecond', 30 ),
+      keepProportions: this.$ls.get( 'fixplot_proportions', true ),
+      colorized: this.$ls.get( 'fixplot_colorized', true ),
+      showSaccades: this.$ls.get( 'fixplot_saccades', false ),
       timeRange: [0, 1],
       errorMessage: '',
     } as CompData;
@@ -236,18 +236,22 @@ export default Vue.extend({
 
   watch: {
     pixelsPerSecond( value: number ) {
+      this.$ls.set( 'fixplot_pixelsPerSecond', value );
       this.updatePlot();
     },
 
     colorized( value: boolean ) {
+      this.$ls.set( 'fixplot_colorized', value );
       this.updatePlot();
     },
 
     showSaccades( value: boolean ) {
+      this.$ls.set( 'fixplot_saccades', value );
       this.updatePlot();
     },
 
     keepProportions( value: boolean ) {
+      this.$ls.set( 'fixplot_proportions', value );
       this.$nextTick().then( () => {
         this.updatePlot();
       });

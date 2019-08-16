@@ -96,8 +96,8 @@ export default Vue.extend({
       targets: null,
       events: null,
       fixations: null,
-      pixelsPerSecond: 100,
-      intensity: 200,
+      pixelsPerSecond: this.$ls.get( 'heatmap_pixelsPerSecond', 100 ),
+      intensity: this.$ls.get( 'heatmap_intensity', 200 ),
       timeRange: [0, 1],
       errorMessage: '',
     } as CompData;
@@ -259,10 +259,12 @@ export default Vue.extend({
 
   watch: {
     pixelsPerSecond( value: number ) {
+      this.$ls.set( 'heatmap_pixelsPerSecond', value );
       this.updateHeatmap();
     },
 
     intensity( value: number ) {
+      this.$ls.set( 'heatmap_intensity', value );
       this.updateHeatmap();
     },
 
