@@ -1,6 +1,6 @@
-import * as Defs from '@/core/decl';
-
+import * as Stats from '@server/statistics/statistics';
 import * as WebLog from '@server/web/log';
+import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 
 const cache: any = {};
@@ -52,11 +52,11 @@ export function tests(): Promise<string[]> {
   return get( 'tests' );
 }
 
-export function trials(): Promise<Defs.TrialMeta[]> {
+export function trials(): Promise<TrialMeta[]> {
   return get( 'trials' );
 }
 
-export function meta( id: string ): Promise<Defs.TrialMetaExt> {
+export function meta( id: string ): Promise<TrialMetaExt> {
   return getCachedTrial( id, 'meta' );
 }
 
@@ -86,6 +86,10 @@ export function fixations( id: string ): Promise<GazeEvent.Fixation[]> {
 
 export function saccades( id: string ): Promise<GazeEvent.Fixation[]> {
   return getCachedTrial( id, 'gaze/saccades' );
+}
+
+export function stats( id: string ): Promise<Stats.All> {
+  return getCachedTrial( id, 'stats' );
 }
 
 /*

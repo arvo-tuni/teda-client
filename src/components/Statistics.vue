@@ -49,16 +49,17 @@ import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
-import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
 import * as Charts from '@/core/charts';
 
+import * as Stats from '@server/statistics/statistics';
 import * as WebLog from '@server/web/log';
+import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 
 interface CompData {
   isLoaded: boolean;
-  meta: Defs.TrialMetaExt;
+  meta: TrialMetaExt;
   targets: WebLog.Clickable[];
   events: WebLog.TestEvent[];
   fixations: Transform.Fixation[];
@@ -69,6 +70,7 @@ interface CompData {
   scrolls: Transform.TimedMouseEvent[];
   errorMessage: string;
   charts: Chart[];
+  statistics: Stats.All;
 }
 
 export default Vue.extend({
@@ -82,7 +84,7 @@ export default Vue.extend({
   data() {
     return {
       isLoaded: false,
-      meta: new Defs.TrialMetaExt(),
+      meta: new TrialMetaExt(),
       targets: [],
       events: [],
       fixations: [],
@@ -97,6 +99,7 @@ export default Vue.extend({
       scrolls: [],
       errorMessage: '',
       charts: [],
+      statistics: {} as Stats.All,
     } as CompData;
   },
 
@@ -127,7 +130,7 @@ export default Vue.extend({
       this.errorMessage = '';
 
       Data.meta( this.trial )
-        .then( (meta: Defs.TrialMetaExt) => {
+        .then( (meta: TrialMetaExt) => {
           this.meta = Transform.meta( meta );
           return Data.targets( this.trial );
         })
@@ -152,6 +155,14 @@ export default Vue.extend({
             this.events as WebLog.TestEvent[],
           );
           this.saccades = Transform.saccades( fixations );
+
+          // new
+          return Data.stats( this.trial );
+        })
+        .then( (statistics: Stats.All) => {
+          this.statistics = statistics;
+          // end of new
+
           return this.$nextTick();
         })
         .then( () => {
@@ -183,7 +194,7 @@ export default Vue.extend({
       }
 
       if (this.hasHits) {
-        this.charts.push( Charts.hits( this.$refs.hits as HTMLCanvasElement, this.hits ) );
+        this.charts.push( Charts.hits( this.$refs.hits as HTMLCanvasElement, this.statistics.hitsTimed ) );
       }
 
       if (this.hasVero) {

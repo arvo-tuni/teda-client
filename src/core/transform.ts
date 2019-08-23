@@ -1,8 +1,9 @@
-import * as Defs from '@/core/decl';
-
 import * as WebLog from '@server/web/log';
+import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Timestamp } from '@server/tobii/log';
+
+// Interfaces
 
 export interface Fixation {
   timestamp: Timestamp;
@@ -48,7 +49,9 @@ export interface VeroEvents {
   ui: TimedVeroEvent[];
 }
 
-export function trials( data: Defs.TrialMeta[] ): Defs.TrialMeta[] {
+// Make timestamps as Date
+
+export function trials( data: TrialMeta[] ): TrialMeta[] {
   data.forEach( item => {
     if (typeof item.timestamp === 'string') {
       item.timestamp = new Date( item.timestamp );
@@ -58,7 +61,7 @@ export function trials( data: Defs.TrialMeta[] ): Defs.TrialMeta[] {
   return data;
 }
 
-export function meta( data: Defs.TrialMetaExt ): Defs.TrialMetaExt {
+export function meta( data: TrialMetaExt ): TrialMetaExt {
   if (typeof data.startTime === 'string') {
     data.startTime = new Date( data.startTime );
   }
@@ -78,6 +81,8 @@ export function events( allEvents: WebLog.TestEvent[] ): WebLog.TestEvent[] {
 
   return allEvents;
 }
+
+// Transform data
 
 export function fixations( data: GazeEvent.Fixation[], allEvents: WebLog.TestEvent[] ): Fixation[]  {
 
@@ -109,6 +114,10 @@ export function fixations( data: GazeEvent.Fixation[], allEvents: WebLog.TestEve
 
 export function saccades( data: GazeEvent.Fixation[] ): Saccade[]  {
   return data.map( fixation => {
+    if (typeof fixation.timestamp.LocalTimeStamp === 'string') {
+      fixation.timestamp.LocalTimeStamp = new Date( fixation.timestamp.LocalTimeStamp );
+    }
+
     return {
       timestamp: fixation.timestamp,
       amplitude: fixation.saccadicAmplitude,
@@ -118,23 +127,7 @@ export function saccades( data: GazeEvent.Fixation[] ): Saccade[]  {
   });
 }
 
-export function averageDuration( data: Fixation[] ): number {
-  if (data.length === 0) {
-    return 0;
-  }
-  else {
-    return data.reduce( (acc, fixation) => acc += fixation.duration, 0 ) / data.length;
-  }
-}
-
-export function averageAmplitude( data: Saccade[] ): number {
-  if (data.length === 0) {
-    return 0;
-  }
-  else {
-    return data.reduce( (acc, saccade) => acc += saccade.amplitude, 0 ) / data.length;
-  }
-}
+// Filter events
 
 export function vero( allEvents: WebLog.TestEvent[], startTime: Date ): VeroEvents {
   const start = startTime.valueOf();
@@ -164,4 +157,24 @@ export function scrolls( allEvents: WebLog.TestEvent[], startTime: Date ): Timed
   const scrollEvents = allEvents.filter( e => e.type === 'scroll' ) as WebLog.TestEventScroll[];
 
   return scrollEvents.map( e => new TimedMouseEvent( e.timestamp.valueOf() - start, 'scroll', e.position ) );
+}
+
+// Misc
+
+export function averageDuration( data: Fixation[] ): number {
+  if (data.length === 0) {
+    return 0;
+  }
+  else {
+    return data.reduce( (acc, fixation) => acc += fixation.duration, 0 ) / data.length;
+  }
+}
+
+export function averageAmplitude( data: Saccade[] ): number {
+  if (data.length === 0) {
+    return 0;
+  }
+  else {
+    return data.reduce( (acc, saccade) => acc += saccade.amplitude, 0 ) / data.length;
+  }
 }

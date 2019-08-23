@@ -14,14 +14,14 @@ import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
-import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
 import { Target, Painter } from '@/core/painter';
 
 import * as WebLog from '@server/web/log';
+import { TrialMetaExt } from '@server/web/meta';
 
 interface CompData {
-  meta: Defs.TrialMetaExt;
+  meta: TrialMetaExt;
   targets: WebLog.Clickable[];
   marksCorrect: number[] | null;
   marksWrong: number[] | null;
@@ -38,7 +38,7 @@ export default Vue.extend({
 
   data() {
     return {
-      meta: new Defs.TrialMetaExt(),
+      meta: new TrialMetaExt(),
       targets: [],
       marksCorrect: null,
       marksWrong: null,
@@ -64,7 +64,7 @@ export default Vue.extend({
       this.errorMessage = '';
 
       Data.meta( this.trial )
-        .then( (meta: Defs.TrialMetaExt) => {
+        .then( (meta: TrialMetaExt) => {
           this.meta = Transform.meta( meta );
           return Data.targets( this.trial );
         })

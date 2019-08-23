@@ -16,7 +16,7 @@
     ],
     "paths": {
       "@/*": [ "src/*" ],
-      "@server/*": [ "../test-data-server/js/*" ]
+      "@server/*": [ "../test-data-server/src/*" ]
     },
     "lib": [
       "esnext",

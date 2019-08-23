@@ -53,14 +53,14 @@ import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
-import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
 import { twoDigits, treeDigits, secToTime, toDate} from '@/core/format';
 
 import * as WebLog from '@server/web/log';
+import { TrialMetaExt } from '@server/web/meta';
 
 interface CompData {
-  meta: Defs.TrialMetaExt;
+  meta: TrialMetaExt;
   errorMessage: string;
 }
 
@@ -74,7 +74,7 @@ export default Vue.extend({
 
   data() {
     return {
-      meta: new Defs.TrialMetaExt(),
+      meta: new TrialMetaExt(),
       errorMessage: '',
     } as CompData;
   },
@@ -115,7 +115,7 @@ export default Vue.extend({
       this.errorMessage = '';
 
       Data.meta( this.trial )
-        .then( (meta: Defs.TrialMetaExt) => {
+        .then( (meta: TrialMetaExt) => {
           this.meta = Transform.meta( meta );
         })
         .catch( (error: Error) => {

@@ -3,7 +3,7 @@ import Chart from 'chart.js';
 import * as Transform from '@/core/transform';
 import * as Format from '@/core/format';
 
-import * as WebLog from '@server/web/log';
+import * as Stats from '@server/statistics/statistics';
 import * as TobiiLog from '@server/tobii/log';
 
 const FIXATION_DURATION_RANGES = [ 150, 300, 500, 750, 1000, 1500, Number.MAX_VALUE ];
@@ -33,10 +33,7 @@ interface VeroDatatype {
 }
 
 interface VeroDatatypes {
-  [key: string]: {
-    name: string,
-    color: string,
-  };
+  [key: string]: VeroDatatype;
 }
 const VERO_DATATYPES: VeroDatatypes = {
   nav: {
@@ -53,34 +50,45 @@ const VERO_DATATYPES: VeroDatatypes = {
   },
 };
 
-export function hits( el: HTMLCanvasElement, data: any[] ) {
-  const datasets: Array<{data: number[], label: string, backgroundColor: string}> = [];
+export function hits( el: HTMLCanvasElement, data: Stats.HitsData ) {
+  // const datasets: Chart.ChartDataSets[] = [];
 
-  if (data[0].wrong !== undefined) {
-    datasets.push({
-      label: 'wrong',
-      data: data.map( (item: WebLog.WrongAndCorrect) => item.wrong ),
-      backgroundColor: BG_DANGER,
-    });
-    datasets.push({
-      label: 'correct',
-      data: data.map( (item: WebLog.WrongAndCorrect) => item.correct ),
-      backgroundColor: BG_SUCCESS,
-    });
-  }
-  else {
-    datasets.push({
-      label: 'total',
-      data,
-      backgroundColor: BG_PRIMARY,
-    });
-  }
+  // if (data[0].wrong !== undefined) {
+  //   datasets.push({
+  //     label: 'wrong',
+  //     data: data.map( (item: WebLog.WrongAndCorrect) => item.wrong ),
+  //     backgroundColor: BG_DANGER,
+  //   });
+  //   datasets.push({
+  //     label: 'correct',
+  //     data: data.map( (item: WebLog.WrongAndCorrect) => item.correct ),
+  //     backgroundColor: BG_SUCCESS,
+  //   });
+  // }
+  // else {
+  //   datasets.push({
+  //     label: 'total',
+  //     data,
+  //     backgroundColor: BG_PRIMARY,
+  //   });
+  // }
 
   return new Chart( el, {
     type: 'bar',
     data: {
-      labels: datasets[0].data.map( (val: number, index: number) => `${(index + 1) * 10}%` ),
-      datasets,
+      labels: data.correct.map( (val: number, index: number) => `${(index + 1) * 10}%` ),
+      datasets: [
+        {
+          label: 'correct',
+          data: data.correct,
+          backgroundColor: BG_SUCCESS,
+        },
+        {
+          label: 'wrong',
+          data: data.wrong,
+          backgroundColor: BG_DANGER,
+        },
+      ],
     },
   });
 }
@@ -94,7 +102,7 @@ export function vero(
   const datasets: Chart.ChartDataSets[] = [];
 
   Object.keys( VERO_DATATYPES ).forEach( (key, index) => {
-    const datatype = VERO_DATATYPES[ key ] as VeroDatatype;
+    const datatype = VERO_DATATYPES[ key ];
     const ev = (events as any)[ key ] as Transform.TimedVeroEvent[];
 
     datasets.push({
@@ -309,7 +317,7 @@ export function fixDurationsTime( el: HTMLCanvasElement, fixations: Transform.Fi
 }
 
 export function saccadeDirections( el: HTMLCanvasElement, saccades: Transform.Saccade[] ) {
-  const datasets: Array<{data: number[], label: string, backgroundColor: string}> = [];
+  const datasets: Chart.ChartDataSets[] = [];
 
   const { data, rangeDuration } = makeTempRange<SaccDirections, Transform.Saccade>(
     TIME_RANGE_INTERVAL,
@@ -374,7 +382,6 @@ export function saccadeDirectionRadar( el: HTMLCanvasElement, saccades: Transfor
 
   const rangeItemAngle = 360 / ANGLE_RANGE_COUNT;
 
-  // const data: number[] = new Array( ANGLE_RANGE_COUNT ).map( (v) => { console.log(v); return 0; } );
   const data: Array<{ label: string, value: number }> = [];
   for (let i = 0; i < ANGLE_RANGE_COUNT; i++) {
     data.push({
@@ -487,11 +494,15 @@ export function saccadeAmplitudeTime( el: HTMLCanvasElement, saccades: Transform
 }
 
 type Callback<T, U> = (items: U[]) => T;
+interface Range<T> {
+  data: T[];
+  rangeDuration: number;
+}
 
 function makeTempRange<T, U extends {timestamp: TobiiLog.Timestamp}>(
   rangeDuration: number,  // seconds
   timestamped: U[],
-  cb: Callback<T, U> ): {data: T[], rangeDuration: number} {
+  cb: Callback<T, U> ): Range<T> {
 
   const end = timestamped.slice( -1 )[0].timestamp.EyeTrackerTimestamp;
   const start = timestamped[0].timestamp.EyeTrackerTimestamp;

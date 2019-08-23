@@ -39,7 +39,6 @@ import Heatmap from '@/components/Heatmap.vue';
 import Statistics from '@/components/Statistics.vue';
 
 import * as Data from '@/core/data';
-import * as Defs from '@/core/decl';
 import VISUALIZATIONS from '@/core/visualizations';
 
 

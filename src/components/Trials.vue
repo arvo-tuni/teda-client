@@ -20,13 +20,14 @@
 import Vue from 'vue';
 
 import * as Data from '@/core/data';
-import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
 import { toDate } from '@/core/format';
 
+import { TrialMeta } from '@server/web/meta';
+
 interface CompData {
-  trials: Defs.TrialMeta[];
-  selected: Defs.TrialMeta | null;
+  trials: TrialMeta[];
+  selected: TrialMeta | null;
 }
 
 /// Emits:
@@ -42,7 +43,7 @@ export default Vue.extend({
   },
 
   methods: {
-    isSelected( trial: Defs.TrialMeta ) {
+    isSelected( trial: TrialMeta ) {
       return this.selected === trial;
     },
 
@@ -50,7 +51,7 @@ export default Vue.extend({
       return toDate( value );
     },
 
-    select( trial: Defs.TrialMeta ) {
+    select( trial: TrialMeta ) {
       this.selected = trial;
       this.$emit( 'selected', trial._id );
     },
@@ -58,7 +59,7 @@ export default Vue.extend({
 
   created() {
     Data.trials()
-      .then( (trials: Defs.TrialMeta[]) => {
+      .then( (trials: TrialMeta[]) => {
         this.trials = Transform.trials( trials );
       });
   },

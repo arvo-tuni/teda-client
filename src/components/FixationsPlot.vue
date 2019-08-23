@@ -60,12 +60,12 @@ import Message from '@/components/Message.vue';
 // import Slider from '@/components/Slider.vue';
 
 import * as Data from '@/core/data';
-import * as Defs from '@/core/decl';
 import * as Transform from '@/core/transform';
 import { Target, Painter } from '@/core/painter';
 import { secToTime } from '@/core/format';
 
 import * as WebLog from '@server/web/log';
+import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Gaze } from '@server/tobii/log';
 
@@ -73,7 +73,7 @@ const MAX_CANVAS_WIDTH = 1024;
 
 interface CompData {
   painter: Painter | null;
-  meta: Defs.TrialMetaExt;
+  meta: TrialMetaExt;
   targets: WebLog.Clickable[] | null;
   events: WebLog.TestEvent[] | null;
   fixations: Transform.Fixation[] | null;
@@ -100,7 +100,7 @@ export default Vue.extend({
   data() {
     return {
       painter: null,
-      meta: new Defs.TrialMetaExt(),
+      meta: new TrialMetaExt(),
       targets: null,
       events: null,
       fixations: null,
@@ -163,7 +163,7 @@ export default Vue.extend({
       this.errorMessage = '';
 
       Data.meta( this.trial )
-        .then( (meta: Defs.TrialMetaExt) => {
+        .then( (meta: TrialMetaExt) => {
           this.meta = Transform.meta( meta );
           return Data.targets( this.trial );
         })

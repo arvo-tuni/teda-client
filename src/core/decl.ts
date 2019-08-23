@@ -1,82 +1,34 @@
-// import * as WebLog from '@server/web/log';   // HMM, this does not compile while the same string is OK in other files
-import * as WebLog from '../../../test-data-server/js/web/log.js';
+import * as WebLog from '@server/web/log';
 
 export class TrialMeta {
   /* tslint:disable-next-line */
-  _id: string;
-  participant: string;
-  timestamp: Date;
-  type: string;
-
-  constructor() {
-    this._id = '';
-    this.participant = '';
-    this.timestamp = new Date();
-    this.type = '';
-  }
+  _id: string = '';
+  participant: string = '';
+  timestamp: Date = new Date();
+  type: string = '';
 }
 
 export class TrialMetaExt {
-  participantCode: string;
-  type: string;
+  participantCode: string = '';
+  type: string = '';
 
-  startTime: Date;
-  endTime: Date;
-  duration: number;
+  startTime: Date = new Date();
+  endTime: Date = new Date();
+  duration: number = 0;
 
-  contentArea: WebLog.ContentArea;
-  windowWidth: number;
-  windowHeight: number;
-  docHeight: number;
+  contentArea: WebLog.ContentArea = new WebLog.ContentArea();
+  windowWidth: number = 0;
+  windowHeight: number = 0;
+  docHeight: number = 0;
 
-  settings: WebLog.Settings;
-  instruction: string;
+  settings: WebLog.Settings = new WebLog.Settings();
+  instruction: string = '';
 
-  misses: number;
-  marks: number;
-  marksWrong: number;
-  maxHistPerTenth: number;
-  scrolls: number;
-  maxScroll: number;
-  headTotals: WebLog.HeadTotals;
-
-  constructor() {
-    this.contentArea = new WebLog.ContentArea();
-    this.windowWidth = 0;
-    this.windowHeight = 0;
-    this.scrolls = 0;
-    this.settings = new WebLog.Settings();
-    this.maxHistPerTenth = 0;
-    this.misses = 0;
-    this.instruction = '';
-    this.docHeight = 0;
-    this.startTime = new Date();
-    this.marks = 0;
-    this.duration = 0;
-    this.type = '';
-    this.endTime = new Date();
-    this.maxScroll = 0;
-    this.headTotals = new WebLog.HeadTotals();
-    this.participantCode = '';
-    this.marksWrong = 0;
-  }
+  misses: number = 0;
+  marks: number = 0;
+  marksWrong: number = 0;
+  maxHistPerTenth: number = 0;
+  scrolls: number = 0;
+  maxScroll: number = 0;
+  headTotals: WebLog.HeadTotals = new WebLog.HeadTotals();
 }
-
-// Data left out
-
-// this.hitsPerTenth = [ Number, WrongAndCorrect ];     // 10 values
-// this.clickables = [ Clickable ];
-// this.marked: number[];
-// this.markedWrong = [Number];
-// this.lastMarked = Number;
-// this.events = [
-//     TestEvent,
-//     TestEventBuild,
-//     TestEventClicked,
-//     TestEventScroll,
-//     TestEventVeroNav,
-//     TestEventVeroNavData,
-//     TestEventVeroUI,
-// ];
-// this.gaze
-// this.headData = [ HeadData ];
