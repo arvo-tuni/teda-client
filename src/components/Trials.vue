@@ -23,7 +23,7 @@ import * as Data from '@/core/data';
 import * as Transform from '@/core/transform';
 import { toDate } from '@/core/format';
 
-import { TrialMeta } from '@server/web/meta';
+import { TrialMeta } from '../../../test-data-server/src/web/meta';
 
 interface CompData {
   trials: TrialMeta[];

@@ -60,7 +60,7 @@ import { secToTime } from '@/core/format';
 import { Heatmap } from '@/core/heatmap';
 
 import * as WebLog from '@server/web/log';
-import { TrialMetaExt } from '@server/web/meta';
+import { TrialMetaExt } from '../../../test-data-server/src/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Gaze } from '@server/tobii/log';
 

@@ -65,7 +65,7 @@ import { Target, Painter } from '@/core/painter';
 import { secToTime } from '@/core/format';
 
 import * as WebLog from '@server/web/log';
-import { TrialMetaExt } from '@server/web/meta';
+import { TrialMetaExt } from '../../../test-data-server/src/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Gaze } from '@server/tobii/log';
 

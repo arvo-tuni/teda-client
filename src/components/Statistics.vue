@@ -54,7 +54,7 @@ import * as Charts from '@/core/charts';
 
 import * as Stats from '@server/statistics/statistics';
 import * as WebLog from '@server/web/log';
-import { TrialMetaExt } from '@server/web/meta';
+import { TrialMetaExt } from '../../../test-data-server/src/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 
 interface CompData {
