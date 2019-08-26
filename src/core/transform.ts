@@ -1,7 +1,7 @@
 import * as WebLog from '@server/web/log';
-import * as GazeEvent from '@server/tobii/gaze-event';
 import { TrialMeta, TrialMetaExt } from '@server/web/meta';
-import * as StatTransform from '../../../test-data-server/src/statistics/transform';
+import * as GazeEvent from '@server/tobii/gaze-event';
+import * as StatTransform from '@server/statistics/transform';
 
 // Interfaces
 

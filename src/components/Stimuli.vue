@@ -18,7 +18,7 @@ import * as Transform from '@/core/transform';
 import { Target, Painter } from '@/core/painter';
 
 import * as WebLog from '@server/web/log';
-import { TrialMetaExt } from '../../../test-data-server/src/web/meta';
+import { TrialMetaExt } from '@server/web/meta';
 
 interface CompData {
   meta: TrialMetaExt;

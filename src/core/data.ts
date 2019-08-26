@@ -1,6 +1,6 @@
 import * as Statistics from '@server/statistics/types';
 import * as WebLog from '@server/web/log';
-import { TrialMeta, TrialMetaExt } from '../../../test-data-server/src/web/meta';
+import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 
 const cache: any = {};

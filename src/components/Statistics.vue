@@ -51,10 +51,10 @@ import * as Transform from '@/core/transform';
 import * as Charts from '@/core/charts';
 
 import * as WebLog from '@server/web/log';
-import { TrialMetaExt } from '../../../test-data-server/src/web/meta';
+import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import * as Statistics from '@server/statistics/types';
-import * as StatisticsParams from '../../../test-data-server/src/statistics/params';
+import * as StatisticsParams from '@server/statistics/params';
 
 interface CompData {
   isLoaded: boolean;
