@@ -1,4 +1,4 @@
-import * as Statistics from '@server/statistics/types';
+import { Data as Statistics } from '@server/statistics/types';
 import * as WebLog from '@server/web/log';
 import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
@@ -88,7 +88,7 @@ export function saccades( id: string ): Promise<GazeEvent.Fixation[]> {
   return getCachedTrial( id, 'gaze/saccades' );
 }
 
-export function stats( id: string ): Promise<Statistics.Data> {
+export function stats( id: string ): Promise<Statistics> {
   return getCachedTrial( id, 'stats' );
 }
 

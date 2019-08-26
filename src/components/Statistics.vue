@@ -53,7 +53,7 @@ import * as Charts from '@/core/charts';
 import * as WebLog from '@server/web/log';
 import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
-import * as Statistics from '@server/statistics/types';
+import { Data as Statistics } from '@server/statistics/types';
 import * as StatisticsParams from '@server/statistics/params';
 
 interface CompData {
@@ -66,7 +66,7 @@ interface CompData {
   scrolls: Transform.TimedEvent[];
   errorMessage: string;
   charts: Chart[];
-  statistics: Statistics.Data;
+  statistics: Statistics;
 }
 
 export default Vue.extend({
@@ -92,7 +92,7 @@ export default Vue.extend({
       scrolls: [],
       errorMessage: '',
       charts: [],
-      statistics: {} as Statistics.Data,
+      statistics: {} as Statistics,
     } as CompData;
   },
 
@@ -138,7 +138,7 @@ export default Vue.extend({
           this.vero = Transform.vero( events, this.meta.startTime );
           return Data.stats( this.trial );
         })
-        .then( (statistics: Statistics.Data) => {
+        .then( (statistics: Statistics) => {
           this.statistics = statistics;
           return this.$nextTick();
         })

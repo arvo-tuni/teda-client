@@ -69,6 +69,7 @@ import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Gaze } from '@server/tobii/log';
 import * as StatTypes from '@server/statistics/types';
+import { fixations as alignFixations } from '@server/statistics/transform';
 
 const MAX_CANVAS_WIDTH = 1024;
 
@@ -78,7 +79,6 @@ interface CompData {
   targets: WebLog.Clickable[] | null;
   events: WebLog.TestEvent[] | null;
   fixations: StatTypes.Fixation[] | null;
-  // saccades: GazeEvent.Saccade[] | null;
   pixelsPerSecond: number;
   keepProportions: boolean;
   colorized: boolean;
@@ -105,7 +105,6 @@ export default Vue.extend({
       targets: null,
       events: null,
       fixations: null,
-      // saccades: null,
       pixelsPerSecond: this.$ls.get( 'fixplot_pixelsPerSecond', 30 ),
       keepProportions: this.$ls.get( 'fixplot_proportions', true ),
       colorized: this.$ls.get( 'fixplot_colorized', true ),
@@ -177,14 +176,10 @@ export default Vue.extend({
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {
-          this.fixations = Transform.fixations(
+          this.fixations = alignFixations(
             fixations as GazeEvent.Fixation[],
             this.events as WebLog.TestEvent[],
           );
-        //   return Data.saccades( this.trial );
-        // })
-        // .then( (saccades: GazeEvent.Saccade[]) => {
-        //   this.saccades = saccades;
           return this.$nextTick();
         })
         .then( () => {

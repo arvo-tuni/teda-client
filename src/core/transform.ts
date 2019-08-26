@@ -87,13 +87,3 @@ export function scrolls( allEvents: WebLog.TestEvent[], startTime: Date ): Timed
 
   return scrollEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, 'scroll', e.position ) );
 }
-
-// Transform data
-
-export function fixations( data: GazeEvent.Fixation[], allEvents: WebLog.TestEvent[] )  {
-  return StatTransform.fixations( data, allEvents);
-}
-
-export function saccades( data: GazeEvent.Fixation[] )  {
-  return StatTransform.saccades( data );
-}

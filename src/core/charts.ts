@@ -1,4 +1,4 @@
-import Chart, { ChartPoint } from 'chart.js';
+import Chart from 'chart.js';
 
 import * as Transform from '@/core/transform';
 import * as Format from '@/core/format';
