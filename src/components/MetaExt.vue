@@ -141,8 +141,6 @@ export default Vue.extend({
     padding: 1.5rem;
   }
 }
-.property {
-}
 .subProperty {
   font-size: smaller;
 }

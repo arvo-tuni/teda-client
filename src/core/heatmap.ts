@@ -1,4 +1,4 @@
-import { Fixation } from '@/core/transform';
+import { Fixation } from '@server/statistics/types';
 
 import * as WebLog from '@server/web/log';
 

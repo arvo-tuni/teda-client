@@ -1,42 +1,16 @@
 import * as WebLog from '@server/web/log';
-import { TrialMeta, TrialMetaExt } from '../../../test-data-server/src/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
-import { Timestamp } from '@server/tobii/log';
+import { TrialMeta, TrialMetaExt } from '@server/web/meta';
+import * as StatTransform from '../../../test-data-server/src/statistics/transform';
 
 // Interfaces
 
-export interface Fixation {
-  timestamp: Timestamp;
-  x: number;
-  y: number;
-  duration: number;
-}
-
-export interface Saccade {
-  timestamp: Timestamp;
-  amplitude: number;
-  absoluteAngle: number;
-  relativeAngle: number;
-}
-
-export class TimedVeroEvent {
+export class TimedEvent {
   timestamp: number;
   name: string;
-  value: string;
+  value: string | number;
 
-  constructor( timestamp: number, name: string, value: string ) {
-    this.timestamp = timestamp;
-    this.name = name;
-    this.value = value;
-  }
-}
-
-export class TimedMouseEvent {
-  timestamp: number;
-  name: string;
-  value: number;
-
-  constructor( timestamp: number, name: string, value: number ) {
+  constructor( timestamp: number, name: string, value: string | number ) {
     this.timestamp = timestamp;
     this.name = name;
     this.value = value;
@@ -44,9 +18,9 @@ export class TimedMouseEvent {
 }
 
 export interface VeroEvents {
-  nav: TimedVeroEvent[];
-  data: TimedVeroEvent[];
-  ui: TimedVeroEvent[];
+  nav: TimedEvent[];
+  data: TimedEvent[];
+  ui: TimedEvent[];
 }
 
 // Make timestamps as Date
@@ -82,54 +56,9 @@ export function events( allEvents: WebLog.TestEvent[] ): WebLog.TestEvent[] {
   return allEvents;
 }
 
-// Transform data
-
-export function fixations( data: GazeEvent.Fixation[], allEvents: WebLog.TestEvent[] ): Fixation[]  {
-
-  const scrollEvents = allEvents.filter( e => e.type === 'scroll' ) as WebLog.TestEventScroll[];
-
-  let scrollPosition = 0;
-  let nextScroll: WebLog.TestEventScroll | null = scrollEvents.length > 0 ? scrollEvents[0] : null;
-  let scrollIndex = 1;
-
-  return data.map( fixation => {
-
-    while (nextScroll && nextScroll.timestamp < fixation.timestamp.LocalTimeStamp) {
-      scrollPosition = nextScroll.position;
-      nextScroll = scrollIndex < scrollEvents.length ? scrollEvents[ scrollIndex++ ] : null;
-    }
-
-    if (typeof fixation.timestamp.LocalTimeStamp === 'string') {
-      fixation.timestamp.LocalTimeStamp = new Date( fixation.timestamp.LocalTimeStamp );
-    }
-
-    return {
-      timestamp: fixation.timestamp,
-      x: fixation.x,
-      y: fixation.y + scrollPosition,
-      duration: fixation.duration,
-    };
-  });
-}
-
-export function saccades( data: GazeEvent.Fixation[] ): Saccade[]  {
-  return data.map( fixation => {
-    if (typeof fixation.timestamp.LocalTimeStamp === 'string') {
-      fixation.timestamp.LocalTimeStamp = new Date( fixation.timestamp.LocalTimeStamp );
-    }
-
-    return {
-      timestamp: fixation.timestamp,
-      amplitude: fixation.saccadicAmplitude,
-      absoluteAngle: fixation.absoluteSaccadicDirection,
-      relativeAngle: fixation.relativeSaccadicDirection,
-    };
-  });
-}
-
 // Filter events
 
-export function vero( allEvents: WebLog.TestEvent[], startTime: Date ): VeroEvents {
+export function vero( allEvents: WebLog.TestEvent[], startTime: Date ) {
   const start = startTime.valueOf();
 
   const navEvents = allEvents.filter( e => e.type === 'veroNavigation' ) as WebLog.TestEventVeroNav[];
@@ -137,44 +66,34 @@ export function vero( allEvents: WebLog.TestEvent[], startTime: Date ): VeroEven
   const uiEvents = allEvents.filter( e => e.type === 'uiAdjustment' ) as WebLog.TestEventVeroUI[];
 
   return {
-    nav: navEvents.map( e => new TimedVeroEvent( e.timestamp.valueOf() - start, e.target, '' ) ),
-    data: dataEvents.map( e => new TimedVeroEvent( e.timestamp.valueOf() - start, e.variable, e.value ) ),
-    ui: uiEvents.map( e => new TimedVeroEvent( e.timestamp.valueOf() - start, e.target, e.enable ) ),
-  };
+    nav: navEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, e.target, '' ) ),
+    data: dataEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, e.variable, e.value ) ),
+    ui: uiEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, e.target, e.enable ) ),
+  } as VeroEvents;
 }
 
-export function clicks( allEvents: WebLog.TestEvent[], startTime: Date ): TimedMouseEvent[] {
+export function clicks( allEvents: WebLog.TestEvent[], startTime: Date ): TimedEvent[] {
   const start = startTime.valueOf();
 
   const clickEvents = allEvents.filter( e => e.type === 'clicked' ) as WebLog.TestEventClicked[];
 
-  return clickEvents.map( e => new TimedMouseEvent( e.timestamp.valueOf() - start, 'click', e.index ) );
+  return clickEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, 'click', e.index ) );
 }
 
-export function scrolls( allEvents: WebLog.TestEvent[], startTime: Date ): TimedMouseEvent[] {
+export function scrolls( allEvents: WebLog.TestEvent[], startTime: Date ): TimedEvent[] {
   const start = startTime.valueOf();
 
   const scrollEvents = allEvents.filter( e => e.type === 'scroll' ) as WebLog.TestEventScroll[];
 
-  return scrollEvents.map( e => new TimedMouseEvent( e.timestamp.valueOf() - start, 'scroll', e.position ) );
+  return scrollEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, 'scroll', e.position ) );
 }
 
-// Misc
+// Transform data
 
-export function averageDuration( data: Fixation[] ): number {
-  if (data.length === 0) {
-    return 0;
-  }
-  else {
-    return data.reduce( (acc, fixation) => acc += fixation.duration, 0 ) / data.length;
-  }
+export function fixations( data: GazeEvent.Fixation[], allEvents: WebLog.TestEvent[] )  {
+  return StatTransform.fixations( data, allEvents);
 }
 
-export function averageAmplitude( data: Saccade[] ): number {
-  if (data.length === 0) {
-    return 0;
-  }
-  else {
-    return data.reduce( (acc, saccade) => acc += saccade.amplitude, 0 ) / data.length;
-  }
+export function saccades( data: GazeEvent.Fixation[] )  {
+  return StatTransform.saccades( data );
 }

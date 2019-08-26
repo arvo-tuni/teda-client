@@ -1,78 +1,32 @@
-import Chart from 'chart.js';
+import Chart, { ChartPoint } from 'chart.js';
 
 import * as Transform from '@/core/transform';
 import * as Format from '@/core/format';
 
-import * as Stats from '@server/statistics/statistics';
-import * as TobiiLog from '@server/tobii/log';
-
-const FIXATION_DURATION_RANGES = [ 150, 300, 500, 750, 1000, 1500, Number.MAX_VALUE ];
-const SACCADE_AMPLITUDE_RANGES = [ 1, 2, 3.5, 7, Number.MAX_VALUE ];
-const ANGLE_RANGE_COUNT = 8;
-const TIME_RANGE_INTERVAL = 20;    // sec
+import * as Statistics from '@server/statistics/types';
 
 const BG_PRIMARY = 'hsla(210, 90%, 50%, 0.7)';
 const BG_PRIMARY_LIGHT = 'hsla(210, 90%, 50%, 0.2)';
 const BG_SUCCESS = 'hsla(120, 100%, 50%, 0.3)';
 const BG_DANGER = 'hsla(0, 100%, 50%, 0.3)';
 
-interface SaccDirections {
-  forward: number;
-  backward: number;
-  other: number;
+interface ChartDataExt extends Chart.ChartData {
+  name?: string;
+  value?: string;
 }
 
-interface VeroData extends Chart.ChartData {
-  name: string;
-  value: string;
+interface EventColor {
+  [key: string]: string;
 }
-
-interface VeroDatatype {
-  name: string;
-  color: string;
-}
-
-interface VeroDatatypes {
-  [key: string]: VeroDatatype;
-}
-const VERO_DATATYPES: VeroDatatypes = {
-  nav: {
-    name: 'navigate',
-    color: BG_PRIMARY,
-  },
-  data: {
-    name: 'data',
-    color: BG_SUCCESS,
-  },
-  ui: {
-    name: 'UI',
-    color: BG_DANGER,
-  },
+const EVENT_COLOR: EventColor = {
+  navigate: BG_PRIMARY,
+  data: BG_SUCCESS,
+  ui: BG_DANGER,
+  clicks: BG_PRIMARY_LIGHT,
+  scrolls: BG_PRIMARY,
 };
 
-export function hits( el: HTMLCanvasElement, data: Stats.HitsData ) {
-  // const datasets: Chart.ChartDataSets[] = [];
-
-  // if (data[0].wrong !== undefined) {
-  //   datasets.push({
-  //     label: 'wrong',
-  //     data: data.map( (item: WebLog.WrongAndCorrect) => item.wrong ),
-  //     backgroundColor: BG_DANGER,
-  //   });
-  //   datasets.push({
-  //     label: 'correct',
-  //     data: data.map( (item: WebLog.WrongAndCorrect) => item.correct ),
-  //     backgroundColor: BG_SUCCESS,
-  //   });
-  // }
-  // else {
-  //   datasets.push({
-  //     label: 'total',
-  //     data,
-  //     backgroundColor: BG_PRIMARY,
-  //   });
-  // }
-
+export function hits( el: HTMLCanvasElement, data: Statistics.Hits ) {
   return new Chart( el, {
     type: 'bar',
     data: {
@@ -93,62 +47,43 @@ export function hits( el: HTMLCanvasElement, data: Stats.HitsData ) {
   });
 }
 
-export function vero(
+export function userEvents(
   el: HTMLCanvasElement,
-  events: Transform.VeroEvents,
-  clicks: Transform.TimedMouseEvent[],
-  scrolls: Transform.TimedMouseEvent[],
+  veroEvents: Transform.VeroEvents,
+  clicks: Transform.TimedEvent[],
+  scrolls: Transform.TimedEvent[],
 ) {
   const datasets: Chart.ChartDataSets[] = [];
 
-  Object.keys( VERO_DATATYPES ).forEach( (key, index) => {
-    const datatype = VERO_DATATYPES[ key ];
-    const ev = (events as any)[ key ] as Transform.TimedVeroEvent[];
+  const events = {
+    clicks,
+    scrolls,
+    ...veroEvents,
+  };
+
+  let index = 0;
+  Object.keys( events ).forEach( key => {
+    const data = (events as any)[ key ] as Transform.TimedEvent[];
+    if (!data || data.length === 0) {
+      return;
+    }
 
     datasets.push({
-      label: datatype.name,
+      label: key,
       pointRadius: 7,
       pointHoverRadius: 9,
       showLine: false,
-      data: ev.map( item => { return {
+      data: data.map( item => { return {
         x: item.timestamp / 1000,
         y: index + 1,
         name: item.name,
         value: item.value,
       }; }),
-      backgroundColor: datatype.color,
+      backgroundColor: EVENT_COLOR[ key ],
     });
+
+    index++;
   });
-
-  if (clicks.length > 0) {
-    datasets.push({
-      label: 'clicks',
-      pointRadius: 7,
-      pointHoverRadius: 9,
-      showLine: false,
-      data: clicks.map( item => { return {
-        x: item.timestamp / 1000,
-        y: 0,
-        value: item.value,
-      }; }),
-      backgroundColor: BG_PRIMARY_LIGHT,
-    });
-  }
-
-  if (scrolls.length > 0) {
-    datasets.push({
-      label: 'scrolls',
-      pointRadius: 7,
-      pointHoverRadius: 9,
-      showLine: false,
-      data: scrolls.map( item => { return {
-        x: item.timestamp / 1000,
-        y: 4,
-        value: item.value,
-      }; }),
-      backgroundColor: BG_PRIMARY_LIGHT,
-    });
-  }
 
   return new Chart( el, {
     type: 'scatter',
@@ -161,7 +96,7 @@ export function vero(
         callbacks: {
           label: (tooltipItem, data) => {
             const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
-            const values = dataset.data as VeroData[];
+            const values = dataset.data as ChartDataExt[];
             const { name, value } = values[ tooltipItem.index || 0];
             const nameStr = name ? ` "${name}"` : '';
             const valStr = value !== undefined ? ` = [${value}]` : '';
@@ -178,8 +113,8 @@ export function vero(
         }],
         yAxes: [{
           ticks: {
-            min: -0.5,
-            max: 4.5,
+            min: 0.5,
+            max: index + 0.5,
             stepSize: 1,
             callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label as string : '',
           },
@@ -189,93 +124,11 @@ export function vero(
   });
 }
 
-export function mouse(
-  el: HTMLCanvasElement,
-  clicks: Transform.TimedMouseEvent[],
-  scrolls: Transform.TimedMouseEvent[],
-) {
-  const datasets: Chart.ChartDataSets[] = [];
-
-  if (clicks.length > 0) {
-    datasets.push({
-      label: 'clicks',
-      pointRadius: 7,
-      pointHoverRadius: 9,
-      showLine: false,
-      data: clicks.map( item => { return {
-        x: item.timestamp / 1000,
-        y: 1,
-        value: item.value,
-      }; }),
-      backgroundColor: BG_PRIMARY_LIGHT,
-    });
-  }
-
-  if (scrolls.length > 0) {
-    datasets.push({
-      label: 'scrolls',
-      pointRadius: 7,
-      pointHoverRadius: 9,
-      showLine: false,
-      data: scrolls.map( item => { return {
-        x: item.timestamp / 1000,
-        y: 2,
-        value: item.value,
-      }; }),
-      backgroundColor: BG_PRIMARY_LIGHT,
-    });
-  }
-
-  return new Chart( el, {
-    type: 'scatter',
-    data: {
-      labels: (datasets[0].data as Chart.ChartData[]).map( _ => '' ),
-      datasets,
-    },
-    options: {
-      tooltips: {
-        callbacks: {
-          label: (tooltipItem, data) => {
-            const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
-            const values = dataset.data as VeroData[];
-            const { value } = values[ tooltipItem.index || 0];
-            const valStr = value !== undefined ? ` "${value}",` : '';
-            return `${dataset.label}:${valStr} ${Format.secToTime( +(tooltipItem.label as string) )}`;
-          },
-        },
-      },
-      scales: {
-        xAxes: [{
-          ticks: {
-            beginAtZero: true,
-            callback: value => Format.secToTime( value ),
-          },
-        }],
-        yAxes: [{
-          ticks: {
-            min: 0,
-            max: 3,
-            stepSize: 1,
-            callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label as string : '',
-          },
-        }],
-      },
-    },
-  });
-}
-
-export function fixDurationsRange( el: HTMLCanvasElement, fixations: Transform.Fixation[] ) {
-  const data = FIXATION_DURATION_RANGES.map( () => 0 );
-
-  fixations.forEach( fix => {
-    const rangeIndex = FIXATION_DURATION_RANGES.findIndex( maxDuration => fix.duration < maxDuration );
-    data[ rangeIndex ] += 1;
-  });
-
+export function fixDurationsRange( el: HTMLCanvasElement, data: number[], ranges: number[] ) {
   return new Chart( el, {
     type: 'bar',
     data: {
-      labels: FIXATION_DURATION_RANGES.map( val => val < 10000 ? `< ${val} ms` : 'rest' ),
+      labels: ranges.map( val => val < 10000 ? `< ${val} ms` : 'rest' ),
       datasets: [{
         label: 'fixations count',
         data,
@@ -285,19 +138,11 @@ export function fixDurationsRange( el: HTMLCanvasElement, fixations: Transform.F
   });
 }
 
-export function fixDurationsTime( el: HTMLCanvasElement, fixations: Transform.Fixation[] ) {
-  const { data, rangeDuration } = makeTempRange<number, Transform.Fixation>(
-    TIME_RANGE_INTERVAL,
-    fixations,
-    (rangeFixations: Transform.Fixation[]) => {
-      return Math.round( Transform.averageDuration( rangeFixations ) );
-    },
-  );
-
+export function fixDurationsTime( el: HTMLCanvasElement, data: number[], itemDuration: number ) {
   return new Chart( el, {
     type: 'bar',
     data: {
-      labels: data.map( (_, i) => Format.secToTime( (i + 1) * rangeDuration ) ),
+      labels: data.map( (_, i) => Format.secToTime( (i + 1) * itemDuration ) ),
       datasets: [{
         label: 'average duration, ms',
         data,
@@ -316,53 +161,32 @@ export function fixDurationsTime( el: HTMLCanvasElement, fixations: Transform.Fi
   });
 }
 
-export function saccadeDirections( el: HTMLCanvasElement, saccades: Transform.Saccade[] ) {
+export function saccadeDirections( el: HTMLCanvasElement, data: Statistics.Directions ) {
   const datasets: Chart.ChartDataSets[] = [];
-
-  const { data, rangeDuration } = makeTempRange<SaccDirections, Transform.Saccade>(
-    TIME_RANGE_INTERVAL,
-    saccades,
-    (rangeSaccades: Transform.Saccade[]) => {
-
-      return rangeSaccades.reduce( (acc, sacc) => {
-        if (315 < sacc.absoluteAngle || sacc.absoluteAngle < 45) {
-          acc.forward++;
-        }
-        else if (135 < sacc.absoluteAngle && sacc.absoluteAngle < 225) {
-          acc.backward++;
-        }
-        else {
-          acc.other++;
-        }
-        return acc;
-      }, {
-        forward: 0,
-        backward: 0,
-        other: 0,
-      } as SaccDirections );
-    },
-  );
 
   datasets.push({
     label: 'forward',
-    data: data.map( (item: SaccDirections) => item.forward ),
+    data: data.forward,
     backgroundColor: BG_SUCCESS,
   });
   datasets.push({
     label: 'backward',
-    data: data.map( (item: SaccDirections) => item.backward ),
+    data: data.backward,
     backgroundColor: BG_DANGER,
   });
-  datasets.push({
-    label: 'other',
-    data: data.map( (item: SaccDirections) => item.other ),
-    backgroundColor: BG_PRIMARY,
-  });
+
+  if (data.other) {
+    datasets.push({
+      label: 'other',
+      data: data.other,
+      backgroundColor: BG_PRIMARY,
+    });
+  }
 
   return new Chart( el, {
     type: 'bar',
     data: {
-      labels: data.map( (_, i) => Format.secToTime( (i + 1) * rangeDuration ) ),
+      labels: data.forward.map( (_, i) => Format.secToTime( (i + 1) * data.itemDuration ) ),
       datasets,
     },
     options: {
@@ -378,37 +202,25 @@ export function saccadeDirections( el: HTMLCanvasElement, saccades: Transform.Sa
   });
 }
 
-export function saccadeDirectionRadar( el: HTMLCanvasElement, saccades: Transform.Saccade[] ) {
+export function saccadeDirectionRadar( el: HTMLCanvasElement, data: Statistics.Angles ) {
 
-  const rangeItemAngle = 360 / ANGLE_RANGE_COUNT;
-
-  const data: Array<{ label: string, value: number }> = [];
-  for (let i = 0; i < ANGLE_RANGE_COUNT; i++) {
-    data.push({
-      label: `${i * 45}\u00b0`,
-      value: 0,
-    });
-  }
-
-  saccades.forEach( sacc => {
-    let rangeIndex = Math.floor( (sacc.absoluteAngle + rangeItemAngle / 2) / rangeItemAngle );
-    if (rangeIndex >= ANGLE_RANGE_COUNT) {
-      rangeIndex = 0;
-    }
-    data[ rangeIndex ].value++;
+  const rotatedData = Object.keys( data ).map( key => { return {
+      label: `${key}\u00b0`,
+      value: data[ +key ],
+    };
   });
 
   // make the order of data so that 0 appears on the right, and degree inceases CCW
-  data.reverse();
-  data.unshift( ...data.splice( ANGLE_RANGE_COUNT - 3, 3 ) );
+  rotatedData.reverse();
+  rotatedData.unshift( ...rotatedData.splice( rotatedData.length - 3, 3 ) );
 
   return new Chart( el, {
     type: 'radar',
     data: {
-      labels: data.map( item => item.label ),
+      labels: rotatedData.map( item => item.label ),
       datasets: [{
         label: 'directions',
-        data: data.map( item => item.value ),
+        data: rotatedData.map( item => item.value ),
         backgroundColor: BG_PRIMARY_LIGHT,
         borderColor: BG_PRIMARY,
       }],
@@ -423,51 +235,31 @@ export function saccadeDirectionRadar( el: HTMLCanvasElement, saccades: Transfor
   });
 }
 
-export function saccadeAmplitudeRange( el: HTMLCanvasElement, saccades: Transform.Saccade[] ) {
-  const dataForward = SACCADE_AMPLITUDE_RANGES.map( () => 0 );
-  const dataBackward = SACCADE_AMPLITUDE_RANGES.map( () => 0 );
-
-  saccades.forEach( sacc => {
-    const rangeIndex = SACCADE_AMPLITUDE_RANGES.findIndex( maxAmplitude => sacc.amplitude < maxAmplitude );
-    if (315 < sacc.absoluteAngle || sacc.absoluteAngle < 45) {
-      dataForward[ rangeIndex ] += 1;
-    }
-    else if (135 < sacc.absoluteAngle && sacc.absoluteAngle < 225) {
-      dataBackward[ rangeIndex ] += 1;
-    }
-  });
+export function saccadeAmplitudeRange( el: HTMLCanvasElement, data: Statistics.Directions, ranges: number[] ) {
 
   return new Chart( el, {
     type: 'bar',
     data: {
-      labels: SACCADE_AMPLITUDE_RANGES.map( val => val < 10000 ? `< ${val}\u00b0` : 'rest' ),
+      labels: ranges.map( val => val < 10000 ? `< ${val}\u00b0` : 'rest' ),
       datasets: [{
         label: 'forward',
-        data: dataForward,
+        data: data.forward,
         backgroundColor: BG_SUCCESS,
       }, {
         label: 'backward',
-        data: dataBackward,
+        data: data.backward,
         backgroundColor: BG_DANGER,
       }],
     },
   });
-
 }
 
-export function saccadeAmplitudeTime( el: HTMLCanvasElement, saccades: Transform.Saccade[] ) {
-  const { data, rangeDuration } = makeTempRange<number, Transform.Saccade>(
-    TIME_RANGE_INTERVAL,
-    saccades,
-    (rangeSaccades: Transform.Saccade[]) => {
-      return Transform.averageAmplitude( rangeSaccades );
-    },
-  );
+export function saccadeAmplitudeTime( el: HTMLCanvasElement, data: number[], itemDuration: number ) {
 
   return new Chart( el, {
     type: 'bar',
     data: {
-      labels: data.map( (_, i) => Format.secToTime( (i + 1) * rangeDuration ) ),
+      labels: data.map( (_, i) => Format.secToTime( (i + 1) * itemDuration ) ),
       datasets: [{
         label: 'average amplitude, deg',
         data,
@@ -492,43 +284,3 @@ export function saccadeAmplitudeTime( el: HTMLCanvasElement, saccades: Transform
     },
   });
 }
-
-type Callback<T, U> = (items: U[]) => T;
-interface Range<T> {
-  data: T[];
-  rangeDuration: number;
-}
-
-function makeTempRange<T, U extends {timestamp: TobiiLog.Timestamp}>(
-  rangeDuration: number,  // seconds
-  timestamped: U[],
-  cb: Callback<T, U> ): Range<T> {
-
-  const end = timestamped.slice( -1 )[0].timestamp.EyeTrackerTimestamp;
-  const start = timestamped[0].timestamp.EyeTrackerTimestamp;
-  const duration = end - start;
-  const rangeCount = Math.round( duration / (rangeDuration * 1000000) );
-  const rangeItemDuration = (end - start) / rangeCount + 1;
-
-  const data: T[] = [];
-
-  let rangeMaxTimestamp = start + rangeItemDuration;
-  let rangeItems: U[] = [];
-
-  timestamped.forEach( item => {
-    if (item.timestamp.EyeTrackerTimestamp > rangeMaxTimestamp) {
-      rangeMaxTimestamp += rangeItemDuration;
-      data.push( cb( rangeItems ) );
-      rangeItems = [];
-    }
-
-    rangeItems.push( item );
-  });
-
-  data.push( cb( rangeItems ) );
-
-  return {
-    data,
-    rangeDuration: rangeItemDuration / 1000000 };
-}
-

@@ -68,6 +68,7 @@ import * as WebLog from '@server/web/log';
 import { TrialMetaExt } from '../../../test-data-server/src/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { Gaze } from '@server/tobii/log';
+import * as StatTypes from '@server/statistics/types';
 
 const MAX_CANVAS_WIDTH = 1024;
 
@@ -76,7 +77,7 @@ interface CompData {
   meta: TrialMetaExt;
   targets: WebLog.Clickable[] | null;
   events: WebLog.TestEvent[] | null;
-  fixations: Transform.Fixation[] | null;
+  fixations: StatTypes.Fixation[] | null;
   // saccades: GazeEvent.Saccade[] | null;
   pixelsPerSecond: number;
   keepProportions: boolean;
