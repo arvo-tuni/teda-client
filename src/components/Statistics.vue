@@ -32,6 +32,7 @@
             canvas(ref="hits" width="640" height="320")
           .chart-container
             h5.title.is-5(v-if="hasVero") Vero and Mouse, timeline
+            h5.title.is-5(v-else-if="hasDrawing") Drawing and Mouse, timeline
             h5.title.is-5(v-else-if="hasMouse") Mouse, timeline
             canvas(ref="userEvents" width="640" height="320")
 
@@ -53,7 +54,7 @@ import * as Charts from '@/core/charts';
 import * as WebLog from '@server/web/log';
 import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
-import { Data as Statistics } from '@server/statistics/types';
+import { ReferencedData as Statistics, Directions, Hits } from '@server/statistics/types';
 import * as StatisticsParams from '@server/statistics/params';
 
 interface CompData {
@@ -61,7 +62,8 @@ interface CompData {
   meta: TrialMetaExt;
   targets: WebLog.Clickable[];
   events: WebLog.TestEvent[];
-  vero: Transform.VeroEvents;
+  vero: Transform.VeroEvents | null;
+  drawing: Transform.DrawingEvents | null;
   clicks: Transform.TimedEvent[];
   scrolls: Transform.TimedEvent[];
   errorMessage: string;
@@ -83,11 +85,8 @@ export default Vue.extend({
       meta: new TrialMetaExt(),
       targets: [],
       events: [],
-      vero: {
-        nav: [],
-        data: [],
-        ui: [],
-      },
+      vero: null,
+      drawing: null,
       clicks: [],
       scrolls: [],
       errorMessage: '',
@@ -105,13 +104,25 @@ export default Vue.extend({
 
   computed: {
     hasFixations(): boolean {
-      return !!this.statistics.fixations;
+      return !!this.statistics.data.fixations;
     },
     hasHits(): boolean {
-      return this.statistics.hits.correct.length > 1;
+      return this.statistics.data.hits.correct.length > 1;
     },
     hasVero(): boolean {
+      if (!this.vero) {
+        return false;
+      }
       return this.vero.nav.length > 0 || this.vero.data.length > 0 || this.vero.ui.length > 0;
+    },
+    hasDrawing(): boolean {
+      if (!this.drawing) {
+        return false;
+      }
+      return this.drawing.instruction.length > 0
+        || this.drawing.drawing.length > 0
+        || this.drawing.sphere.length > 0
+        || this.drawing.cross.length > 0;
     },
     hasMouse(): boolean {
       return this.clicks.length > 0 || this.scrolls.length > 0;
@@ -136,6 +147,7 @@ export default Vue.extend({
           this.clicks = Transform.clicks( this.events, this.meta.startTime );
           this.scrolls = Transform.scrolls( this.events, this.meta.startTime );
           this.vero = Transform.vero( events, this.meta.startTime );
+          this.drawing = Transform.drawing( events, this.meta.startTime );
           return Data.stats( this.trial );
         })
         .then( (statistics: Statistics) => {
@@ -159,43 +171,83 @@ export default Vue.extend({
     createCharts() {
       this.charts = [];
 
+      const refs = this.statistics.reference;
+      const fixes = this.statistics.data.fixations;
+      const saccs = this.statistics.data.saccades;
+
       if (this.hasFixations) {
         this.charts.push(
           Charts.fixDurationsRange(
             this.$refs.fixDurationsRange as HTMLCanvasElement,
-            this.statistics.fixations.durationRanges,
-            StatisticsParams.FIXATION_DURATION_RANGES ),
+            fixes.durationRanges,
+            StatisticsParams.FIXATION_DURATION_RANGES,
+            Transform.toRefNums( 'fixations.durationRanges', refs ),
+          ),
           Charts.fixDurationsTime(
             this.$refs.fixDurationsTime as HTMLCanvasElement,
-            this.statistics.fixations.durationTimes.values,
-            this.statistics.fixations.durationTimes.itemDuration ),
+            fixes.durationTimes.values,
+            fixes.durationTimes.itemDuration,
+            Transform.toRefNums( 'fixations.durationTimes.values', refs ),
+          ),
           Charts.saccadeDirections(
             this.$refs.saccadeDirections as HTMLCanvasElement,
-            this.statistics.saccades.directions ),
+            saccs.directions, {
+              forward: Transform.toRefNums( 'saccades.directions.forward', refs ).means,
+              backward: Transform.toRefNums( 'saccades.directions.backward', refs ).means,
+              other: Transform.toRefNums( 'saccades.directions.other', refs ).means,
+            } as Directions,
+          ),
           Charts.saccadeDirectionRadar(
             this.$refs.saccadeDirectionRadar as HTMLCanvasElement,
-            this.statistics.saccades.directionsRadar ),
+            saccs.directionsRadar,
+            Transform.toRefSet( 'saccades.directionsRadar', refs ),
+          ),
           Charts.saccadeAmplitudeRange(
             this.$refs.saccadeAmplitudeRange as HTMLCanvasElement,
-            this.statistics.saccades.amplitudeRanges,
-            StatisticsParams.SACCADE_AMPLITUDE_RANGES ),
+            saccs.amplitudeRanges,
+            StatisticsParams.SACCADE_AMPLITUDE_RANGES, {
+              forward: Transform.toRefNums( 'saccades.amplitudeRanges.forward', refs ).means,
+              backward: Transform.toRefNums( 'saccades.amplitudeRanges.backward', refs ).means,
+            } as Directions,
+          ),
           Charts.saccadeAmplitudeTime(
             this.$refs.saccadeAmplitudeTime as HTMLCanvasElement,
-            this.statistics.saccades.amplitudeTimes.values,
-            this.statistics.saccades.amplitudeTimes.itemDuration),
+            saccs.amplitudeTimes.values,
+            saccs.amplitudeTimes.itemDuration,
+            Transform.toRefNums( 'saccades.amplitudeTimes.values', refs ),
+          ),
         );
       }
 
       if (this.hasHits) {
-        this.charts.push( Charts.hits( this.$refs.hits as HTMLCanvasElement, this.statistics.hits ) );
+        this.charts.push( Charts.hits(
+          this.$refs.hits as HTMLCanvasElement,
+          this.statistics.data.hits, {
+            correct: Transform.toRefNums( 'hits.correct', refs ).means,
+            wrong: Transform.toRefNums( 'hits.wrong', refs ).means,
+          } as Hits,
+        ));
       }
 
-      this.charts.push( Charts.userEvents(
-        this.$refs.userEvents as HTMLCanvasElement,
-        this.vero,
-        this.clicks,
-        this.scrolls,
-      ) );
+      if (this.vero) {
+        const events = {
+          clicks: this.clicks,
+          scrolls: this.scrolls,
+          ...this.vero,
+        };
+
+        this.charts.push( Charts.userEvents( this.$refs.userEvents as HTMLCanvasElement, events ) );
+      }
+
+      if (this.drawing) {
+        const events = {
+          clicks: this.clicks,
+          scrolls: this.scrolls,
+          ...this.drawing,
+        };
+
+        this.charts.push( Charts.userEvents( this.$refs.userEvents as HTMLCanvasElement, events ) );
+      }
     },
   },
 

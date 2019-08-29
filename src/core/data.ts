@@ -1,4 +1,4 @@
-import { Data as Statistics } from '@server/statistics/types';
+import { ReferencedData as Statistics } from '@server/statistics/types';
 import * as WebLog from '@server/web/log';
 import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
@@ -92,14 +92,12 @@ export function stats( id: string ): Promise<Statistics> {
   return getCachedTrial( id, 'stats' );
 }
 
-/*
+/* Left unused
 '/trial/:id': 'full trial data (WARNING! it may take tens of Mb to load)',
 '/trial/:id/head': 'the trial head data (WARNING! it may take tens of Mb to load)',
 '/trial/:id/gaze': 'the trial Tobii recording meta data (WARNING! it may take tens of Mb to load)',
 '/trial/:id/gaze/stimuli': 'the trial gaze stimuli',
 '/trial/:id/gaze/events': 'the trial mouse and keyboards events',
 '/trial/:id/gaze/samples': 'the trial gaze samples',
-'/trial/:id/gaze/saccades': 'the trial saccades',
 '/trial/:id/gaze/gazeAways': 'the trial gazeAways',
-
 */
