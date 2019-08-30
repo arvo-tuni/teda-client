@@ -1,7 +1,13 @@
 <template lang="pug">
   #home
     template
-      list(v-if="tests.length" prompt="Select a test" :items="tests" @selected="load")
+      .field.has-addons.top-row(v-if="tests.length")
+        p.control.is-expanded
+          list(prompt="Select a test" :items="tests" @selected="load")
+        p.control
+          a.button.update(@click="updateTasksList")
+            span.icon
+              i.fas.fa-redo-alt
       waiting(v-else is-modal=false is-bar=false)
 
     .fixed-footer
@@ -40,6 +46,9 @@ import Statistics from '@/components/Statistics.vue';
 
 import * as Data from '@/core/data';
 import VISUALIZATIONS from '@/core/visualizations';
+import { s } from '@/core/format';
+
+import { UpdateInfo } from '@server/respTypes';
 
 
 interface Data {
@@ -97,6 +106,45 @@ export default Vue.extend({
       else {
         this.errorMessage = err.message || JSON.stringify( err );
       }
+    },
+
+    updateTasksList() {
+      this.successMessage = '';
+      this.errorMessage = '';
+
+      this.isLoading = true;
+
+      Data.updateTasksList()
+        .then( (report: UpdateInfo) => {
+          if (report.removed > 0 || report.appended > 0) {
+            const msgs = [];
+
+            if (report.removed) {
+              msgs.push( `${report.removed} test${s(report.removed)} removed` );
+            }
+            if (report.appended) {
+              msgs.push( `${report.appended} new test${s(report.appended)}` );
+            }
+            this.successMessage = msgs.join(', ');
+  
+            return Data.tests();
+          }
+          else {
+            this.successMessage = 'No changes';
+            return Promise.resolve( this.tests );
+          }
+        })
+        .then( (tests: string[]) => {
+          this.tests = tests;
+        })
+        .catch( (err: Error) => {
+          this.showError( new Error(
+            `Cannot retrieve the list of tests ("${err.message}"). Is server running already?`,
+          ));
+        })
+        .finally( () => {
+          this.isLoading = false;
+        });
     },
 
     load( testName: string ) {
@@ -161,7 +209,9 @@ export default Vue.extend({
         this.tests = tests;
       })
       .catch( (err: Error) => {
-        this.showError( err );
+        this.showError( new Error(
+          `Cannot retrieve the list of tests ("${err.message}"). Is server running already?`,
+        ));
       });
   },
 });
@@ -171,10 +221,17 @@ export default Vue.extend({
 #home {
   padding: 1em;
 }
+.top-row {
+  max-width: 30em;
+  margin: 0 auto;
+}
 .fixed-footer {
   position: fixed;
   bottom: 0;
   left: 5vw;
   width: 90vw;
+}
+.update {
+  box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
 }
 </style>

@@ -23,7 +23,11 @@ const EVENT_COLOR: EventColor = {
   data: Colors.GREEN,
   ui: Colors.RED,
   clicks: Colors.LIGHT_BLUE,
-  scrolls: Colors.BLUE,
+  scrolls: Colors.ORANGE,
+  instruction: Colors.BLUE,
+  drawing: Colors.GREEN,
+  sphere: Colors.RED,
+  cross: Colors.CYAN,
 };
 
 export default function userEvents( el: HTMLCanvasElement, events: UserEvents ) {

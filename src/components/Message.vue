@@ -2,7 +2,7 @@
   article.message(v-if="enabled" :class="cls")
     .message-header
       p {{ message }}
-      button.delete(aria-label="delete" @click="close()")
+      button.delete(v-if="!autoHide" aria-label="delete" @click="close()")
 </template>
 
 <script lang="ts">
@@ -79,10 +79,12 @@ export default Vue.extend({
           this.timer = null;
         }
 
-        this.timer = setInterval( () => {
-          this.enabled = false;
-          this.timer = null;
-        }, AUTO_HIDE_INTERVAL );
+        if (this.enabled) {
+          this.timer = setTimeout( () => {
+            this.enabled = false;
+            this.timer = null;
+          }, AUTO_HIDE_INTERVAL );
+        }
       }
     },
   },

@@ -2,6 +2,7 @@ import { ReferencedData as Statistics } from '@server/statistics/types';
 import * as WebLog from '@server/web/log';
 import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
+import { UpdateInfo } from '@server/respTypes';
 
 const cache: any = {};
 
@@ -90,6 +91,10 @@ export function saccades( id: string ): Promise<GazeEvent.Fixation[]> {
 
 export function stats( id: string ): Promise<Statistics> {
   return getCachedTrial( id, 'stats' );
+}
+
+export function updateTasksList(): Promise<UpdateInfo> {
+  return get( 'update' );
 }
 
 /* Left unused

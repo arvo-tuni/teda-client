@@ -39,17 +39,11 @@ export default Vue.extend({
       type: Array,
       required: true,
     },
-
-    selected: {
-      type: String,
-      default: '',
-      required: false,
-    },
   },
 
   data() {
     return {
-      selectedItem: this.selected,
+      selectedItem: '',
       isListShown: false,
     } as CompData;
   },

@@ -63,3 +63,7 @@ export function toDate( value: string | Date ) {
 
   return `${yyyymmdd.join('.')} ${hhmmss.join(':')}`;
 }
+
+export function s( num: number ) {
+  return num > 1 ? 's' : '';
+}
