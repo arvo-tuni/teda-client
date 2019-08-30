@@ -1,4 +1,4 @@
-import { References } from '@/core/charts';
+import { References } from '@/charts/common';
 import * as WebLog from '@server/web/log';
 import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as StatTypes from '@server/statistics/types';

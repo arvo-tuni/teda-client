@@ -49,7 +49,8 @@ import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
 import * as Transform from '@/core/transform';
-import * as Charts from '@/core/charts';
+
+import * as Charts from '@/charts';
 
 import * as WebLog from '@server/web/log';
 import { TrialMetaExt } from '@server/web/meta';
@@ -197,7 +198,7 @@ export default Vue.extend({
               other: Transform.toRefNums( 'saccades.directions.other', refs ).means,
             } as Directions,
           ),
-          Charts.saccadeDirectionRadar(
+          Charts.saccadeRadar(
             this.$refs.saccadeDirectionRadar as HTMLCanvasElement,
             saccs.directionsRadar,
             Transform.toRefSet( 'saccades.directionsRadar', refs ),

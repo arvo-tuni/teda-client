@@ -2,7 +2,7 @@ import { Fixation } from '@server/statistics/types';
 
 import * as WebLog from '@server/web/log';
 
-declare function createWebGLHeatmap( opt: any ): any;
+declare function createWebGLHeatmap( options: any ): any;
 
 const AREA_EXTENSION = 100;
 
