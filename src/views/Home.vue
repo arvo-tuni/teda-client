@@ -126,7 +126,7 @@ export default Vue.extend({
               msgs.push( `${report.appended} new test${s(report.appended)}` );
             }
             this.successMessage = msgs.join(', ');
-  
+
             return Data.tests();
           }
           else {
