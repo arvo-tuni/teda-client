@@ -1,6 +1,12 @@
 <template lang="pug">
   #statistics
     template(v-if="isLoaded")
+      .settings
+        .field.is-horizontal
+          .field.is-horizontal.one-line.stacked-horz
+            .field-body
+              p.control.stacked-horz.limited-width
+                list(:items="chunkNames" :selected="selectedChunkName" @changed="selectChunk")
       section.section(v-if="hasFixations")
         h3.title.is-3 Fixations
         .charts.is-flex
@@ -46,9 +52,11 @@ import Vue from 'vue';
 
 import Waiting from '@/components/Waiting.vue';
 import Message from '@/components/Message.vue';
+import List from '@/components/List.vue';
 
 import * as Data from '@/core/data';
 import * as Transform from '@/core/transform';
+import { msToTime } from '@/core/format';
 
 import * as Charts from '@/charts';
 
@@ -57,6 +65,8 @@ import { TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { ReferencedData as Statistics, Directions, Hits } from '@server/statistics/types';
 import * as StatisticsParams from '@server/statistics/params';
+
+const ALL_CHUNKS = 'All chunks';
 
 interface CompData {
   isLoaded: boolean;
@@ -67,9 +77,11 @@ interface CompData {
   drawing: Transform.DrawingEvents | null;
   clicks: Transform.TimedEvent[];
   scrolls: Transform.TimedEvent[];
+  chunks: Transform.Chunk[];
   errorMessage: string;
   charts: Chart[];
   statistics: Statistics;
+  chunk?: Transform.Chunk;
 }
 
 export default Vue.extend({
@@ -78,6 +90,7 @@ export default Vue.extend({
   components: {
     Waiting,
     Message,
+    List,
   },
 
   data() {
@@ -90,9 +103,11 @@ export default Vue.extend({
       drawing: null,
       clicks: [],
       scrolls: [],
+      chunks: [],
       errorMessage: '',
       charts: [],
       statistics: {} as Statistics,
+      chunk: undefined,
     } as CompData;
   },
 
@@ -128,6 +143,15 @@ export default Vue.extend({
     hasMouse(): boolean {
       return this.clicks.length > 0 || this.scrolls.length > 0;
     },
+    chunkNames(): string[] {
+      return [
+        ALL_CHUNKS,
+        ...this.chunks.map( chunk => `${chunk.name} (${msToTime( chunk.start, 0 )} - ${msToTime( chunk.end, 0 )})` ),
+      ];
+    },
+    selectedChunkName(): string {
+      return this.chunk ? this.chunk.name : ALL_CHUNKS;
+    },
   },
 
   methods: {
@@ -149,6 +173,8 @@ export default Vue.extend({
           this.scrolls = Transform.scrolls( this.events, this.meta.startTime );
           this.vero = Transform.vero( events, this.meta.startTime );
           this.drawing = Transform.drawing( events, this.meta.startTime );
+          this.chunks = Transform.chunks( events, this.meta.startTime, this.meta.endTime );
+          this.chunks.push( new Transform.Chunk(0, 60000, 'fake'));
           return Data.stats( this.trial );
         })
         .then( (statistics: Statistics) => {
@@ -157,6 +183,30 @@ export default Vue.extend({
         })
         .then( () => {
           this.isLoaded = true;
+          return this.$nextTick();
+        })
+        .then( () => {
+          this.createCharts();
+        })
+        .catch( (error: Error) => {
+          this.errorMessage = 'Cannot retrieve data: '
+            + (error ? error.message : 'unknown error')
+            + '. Close this message to try again';
+        });
+    },
+
+    selectChunk( chunkName: string ) {
+      if (chunkName === ALL_CHUNKS) {
+        this.chunk = undefined;
+      }
+      else {
+        this.chunk = this.chunks.find( c => c.name === chunkName );
+      }
+
+      const promise = this.chunk ? Data.chunkStats( this.trial, this.chunk ) : Data.stats( this.trial );
+      promise
+        .then( (statistics: Statistics) => {
+          this.statistics = statistics;
           return this.$nextTick();
         })
         .then( () => {
@@ -237,7 +287,10 @@ export default Vue.extend({
           ...this.vero,
         };
 
-        this.charts.push( Charts.userEvents( this.$refs.userEvents as HTMLCanvasElement, events ) );
+        this.charts.push( Charts.userEvents(
+          this.$refs.userEvents as HTMLCanvasElement,
+          events,
+        ));
       }
 
       if (this.drawing) {
@@ -247,7 +300,10 @@ export default Vue.extend({
           ...this.drawing,
         };
 
-        this.charts.push( Charts.userEvents( this.$refs.userEvents as HTMLCanvasElement, events ) );
+        this.charts.push( Charts.userEvents(
+          this.$refs.userEvents as HTMLCanvasElement,
+          events,
+        ));
       }
     },
   },
@@ -266,4 +322,18 @@ export default Vue.extend({
 .chart-container {
   margin-bottom: 2em;
 }
+
+.settings {
+  padding: 0 1.75em;
+}
+.stacked-horz {
+  margin-right: 1em;
+}
+.one-line {
+  white-space: nowrap;
+}
+.limited-width {
+  width: 250px;
+}
+
 </style>

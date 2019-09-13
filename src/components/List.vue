@@ -24,7 +24,7 @@ interface CompData {
 }
 
 /// Emits:
-///   selected( item )
+///   changed( item )
 export default Vue.extend({
   name: 'list',
 
@@ -39,11 +39,17 @@ export default Vue.extend({
       type: Array,
       required: true,
     },
+
+    selected: {
+      type: String,
+      default: '',
+      required: false,
+    },
   },
 
   data() {
     return {
-      selectedItem: '',
+      selectedItem: this.selected,
       isListShown: false,
     } as CompData;
   },
@@ -59,7 +65,7 @@ export default Vue.extend({
       this.hideList();
       this.selectedItem = item;
 
-      this.$emit( 'selected', this.selectedItem );
+      this.$emit( 'changed', this.selectedItem );
     },
 
     toggleList() {

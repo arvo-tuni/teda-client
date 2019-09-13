@@ -30,6 +30,30 @@ export interface DrawingEvents {
   cross: TimedEvent[];
 }
 
+export class Group {
+
+  name: string;
+  trials: TrialMeta[] = [];
+
+  constructor( name: string ) {
+    this.name = name;
+  }
+}
+
+export class Chunk {
+
+  start: number;
+  end: number;
+  name: string;
+
+  constructor( start: number, end: number, name: string ) {
+    this.start = start;
+    this.end = end;
+    this.name = name;
+  }
+}
+
+
 // Make timestamps as Date
 
 export function trials( data: TrialMeta[] ): TrialMeta[] {
@@ -136,12 +160,54 @@ export function scrolls( allEvents: WebLog.TestEvent[], startTime: Date ): Timed
   return scrollEvents.map( e => new TimedEvent( e.timestamp.valueOf() - start, 'scroll', e.position ) );
 }
 
+export function chunks( allEvents: WebLog.TestEvent[], startTime: Date, endTime: Date ) {
+  const start = startTime.valueOf();
+
+  const result: Chunk[] = [];
+  let stimuliStart: Date | null = null;
+  let name = '';
+
+  allEvents.forEach( e => {
+    if ((e.type === 'stimuli' || e.type === 'instruction') && stimuliStart) {
+      result.push( new Chunk( stimuliStart.valueOf() - start, e.timestamp.valueOf() - start, name ) );
+    }
+
+    if (e.type === 'stimuli') {
+      stimuliStart = e.timestamp;
+      name = (e as WebLog.TestEventStimuli).name;
+    }
+  });
+
+  if (stimuliStart) {
+    result.push( new Chunk( (stimuliStart as Date).valueOf() - start, endTime.valueOf() - start, name ) );
+  }
+
+  return result;
+}
+
 export function toRefNums( path: string, reference: StatTypes.Reference ) {
   return makeReferences<number[]>( path, reference );
 }
 
 export function toRefSet( path: string, reference: StatTypes.Reference ) {
   return makeReferences<StatTypes.Angles>( path, reference );
+}
+
+export function groups( allTrials: TrialMeta[] ): Group[] {
+  const result: Group[] = [];
+
+  allTrials.forEach( trial => {
+    let group = result.find( g => g.name === trial.group );
+
+    if (!group) {
+      group = new Group( trial.group );
+      result.push( group );
+    }
+
+    group.trials.push( trial );
+  });
+
+  return result;
 }
 
 function makeReferences<T>( path: string, reference: StatTypes.Reference ) {

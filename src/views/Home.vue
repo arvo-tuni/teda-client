@@ -3,7 +3,7 @@
     template
       .field.has-addons.top-row(v-if="tests.length")
         p.control.is-expanded
-          list(prompt="Select a test" :items="tests" @selected="load")
+          list(prompt="Select a test" :items="tests" @changed="load")
         p.control
           a.button.update(@click="updateTasksList")
             span.icon

@@ -1,3 +1,16 @@
+export function leadingZeros( value: number, length: number ): string {
+  const v = [ value.toString() ];
+  let l = v[0].length;
+
+  while (l < length) {
+    v.push( '0' );
+    l++;
+  }
+
+  return v.reverse().join( '' );
+}
+
+/*
 export function twoDigits( value: number ): string {
   return value < 10 ? `0${value}` : value.toString();
 }
@@ -13,10 +26,18 @@ export function treeDigits( value: number ): string {
     return value.toString();
   }
 }
+*/
 
-export function msToTime( duration: number ): string {
+export function msToTime( duration: number, precision: number = 3 ): string {
+  precision = Math.max( 0, Math.min( 3, precision ) );
+
   if (duration === 0) {
-    return '00:00.000';
+    if (precision === 0) {
+      return '00:00';
+    }
+    else {
+      return `00:00.${leadingZeros( 0, precision )}`;
+    }
   }
 
   const ms = duration % 1000;
@@ -28,7 +49,12 @@ export function msToTime( duration: number ): string {
     time = Math.floor( time / 60 );
   }
 
-  return comps.reverse().map( c => twoDigits( c ) ).join( ':' ) + '.' + treeDigits( ms );
+  let result = comps.reverse().map( c => leadingZeros( c, 2 ) ).join( ':' );
+  if (precision) {
+    result += '.' + leadingZeros( ms, precision );
+  }
+
+  return result;
 }
 
 export function secToTime( duration: number ): string {
@@ -43,22 +69,22 @@ export function secToTime( duration: number ): string {
     time = Math.floor( time / 60 );
   }
 
-  return comps.reverse().map( c => twoDigits( c ) ).join( ':' );
+  return comps.reverse().map( c => leadingZeros( c, 2 ) ).join( ':' );
 }
 
 export function toDate( value: string | Date ) {
   const d = typeof value === 'string' ? new Date( value ) : value;
 
   const yyyymmdd = [
-    twoDigits(d.getDate()),
-    twoDigits(d.getMonth() + 1),
+    leadingZeros( d.getDate(), 2 ),
+    leadingZeros( d.getMonth() + 1, 2 ),
     d.getFullYear(),
   ];
 
   const hhmmss = [
-    twoDigits(d.getHours()),
-    twoDigits(d.getMinutes()),
-    twoDigits(d.getSeconds()),
+    leadingZeros( d.getHours(), 2 ),
+    leadingZeros( d.getMinutes(), 2 ),
+    leadingZeros( d.getSeconds(), 2 ),
   ];
 
   return `${yyyymmdd.join('.')} ${hhmmss.join(':')}`;

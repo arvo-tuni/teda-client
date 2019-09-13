@@ -30,7 +30,10 @@ const EVENT_COLOR: EventColor = {
   cross: Colors.CYAN,
 };
 
-export default function userEvents( el: HTMLCanvasElement, events: UserEvents ) {
+export default function userEvents(
+  el: HTMLCanvasElement,
+  events: UserEvents,
+) {
   const datasets: Chart.ChartDataSets[] = [];
 
   let index = 0;

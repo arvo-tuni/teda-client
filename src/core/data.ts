@@ -4,6 +4,8 @@ import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
 import { UpdateInfo } from '@server/respTypes';
 
+import { Chunk } from './transform';
+
 const cache: any = {};
 
 function request( method: string, path: string ): Promise<any> {
@@ -91,6 +93,10 @@ export function saccades( id: string ): Promise<GazeEvent.Fixation[]> {
 
 export function stats( id: string ): Promise<Statistics> {
   return getCachedTrial( id, 'stats' );
+}
+
+export function chunkStats( id: string, chunk: Chunk ): Promise<Statistics> {
+  return getCachedTrial( id, `stats/${chunk.start}-${chunk.end}` );
 }
 
 export function updateTasksList(): Promise<UpdateInfo> {

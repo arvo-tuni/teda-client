@@ -54,7 +54,7 @@ import Message from '@/components/Message.vue';
 
 import * as Data from '@/core/data';
 import * as Transform from '@/core/transform';
-import { twoDigits, treeDigits, secToTime, toDate} from '@/core/format';
+import { secToTime, toDate} from '@/core/format';
 
 import * as WebLog from '@server/web/log';
 import { TrialMetaExt } from '@server/web/meta';
