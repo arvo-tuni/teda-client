@@ -1,6 +1,6 @@
 import Chart from 'chart.js';
 
-//Chart.defaults.global.animation = { duration: 0 };
+// Chart.defaults.global.animation = { duration: 0 };
 
 export const Colors = {
   BLUE: 'hsla(210, 90%, 50%, 0.7)',

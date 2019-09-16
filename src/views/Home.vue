@@ -5,9 +5,13 @@
         p.control.is-expanded
           list(prompt="Select a test" :items="tests" @changed="load")
         p.control
-          a.button.update(@click="updateTasksList")
+          a.button.button-after-combo(@click="updateTasksList")
             span.icon
               i.fas.fa-redo-alt
+        p.control(v-if="!!testName")
+          a.button.button-after-combo(@click="downloadStatistics")
+            span.icon
+              i.fas.fa-download
       waiting(v-else is-modal=false is-bar=false)
 
     .fixed-footer
@@ -47,11 +51,12 @@ import Statistics from '@/components/Statistics.vue';
 import * as Data from '@/core/data';
 import VISUALIZATIONS from '@/core/visualizations';
 import { s } from '@/core/format';
+import { download } from '@/core/utils';
 
 import { UpdateInfo } from '@server/respTypes';
 
 
-interface Data {
+interface CompData {
   tests: string[];
   testName: string;
   errorMessage: string;
@@ -77,15 +82,14 @@ export default Vue.extend({
   },
 
   data() {
-    const r: Data = {
+    return {
       tests: [],
       testName: '',
       errorMessage: '',
       successMessage: '',
       isLoading: false,
       visualizations: VISUALIZATIONS,
-    };
-    return r;
+    } as CompData;
   },
 
   computed: {
@@ -201,6 +205,16 @@ export default Vue.extend({
         });
       }
     },
+
+    downloadStatistics() {
+      Data.downloadStatistics( this.testName )
+        .then( (table: string) => {
+          download( table, this.testName + '.csv' );
+        })
+        .catch( (err: Error) => {
+          this.showError( err );
+        });
+    },
   },
 
   mounted() {
@@ -231,7 +245,7 @@ export default Vue.extend({
   left: 5vw;
   width: 90vw;
 }
-.update {
+.button-after-combo {
   box-shadow: 0 2px 3px rgba(10,10,10,.1), 0 0 0 1px rgba(10,10,10,.1);
 }
 </style>

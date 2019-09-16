@@ -100,7 +100,11 @@ export function chunkStats( id: string, chunk: Chunk ): Promise<Statistics> {
 }
 
 export function updateTasksList(): Promise<UpdateInfo> {
-  return get( 'update' );
+  return get( 'stats/update' );
+}
+
+export function downloadStatistics( test: string ): Promise<string> {
+  return get( `test/${test}/stats` );
 }
 
 /* Left unused
