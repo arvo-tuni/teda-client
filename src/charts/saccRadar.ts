@@ -47,7 +47,7 @@ export default function saccadeRadar(
         ticks: {
           display: false,
         },
-      },
+      } as any,   // work around the incorrect type definition in @types/chart.js
     },
   });
 }
