@@ -200,6 +200,7 @@ export default Vue.extend({
         this.chunk = undefined;
       }
       else {
+        chunkName = chunkName.split( ' ' )[0];
         this.chunk = this.chunks.find( c => c.name === chunkName );
       }
 
