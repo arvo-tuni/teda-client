@@ -5,7 +5,7 @@ module.exports = {
   plugins: [
     ["module-resolver", {
       "alias": {
-        "@server": "../test-data-server/src"
+        "@server": "../teda-server/src"
       }
     }]
   ]  
