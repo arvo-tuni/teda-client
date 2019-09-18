@@ -37,10 +37,10 @@ export default function userEvents(
   const datasets: Chart.ChartDataSets[] = [];
 
   let index = 0;
-  Object.keys( events ).forEach( key => {
-    const data = (events as any)[ key ] as TimedEvent[];
+  for (let key in events ) {
+    const data = events[ key ] as TimedEvent[];
     if (!data || data.length === 0) {
-      return;
+      continue;
     }
 
     datasets.push({
@@ -58,7 +58,7 @@ export default function userEvents(
     });
 
     index++;
-  });
+  };
 
   return new Chart( el, {
     type: 'scatter',
