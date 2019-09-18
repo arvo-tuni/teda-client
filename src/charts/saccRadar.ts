@@ -30,7 +30,7 @@ export default function saccadeRadar(
   if (reference.means) {
     datasets.push({
       label: 'reference',
-      data: rotatedData.map( item => (reference.means as any)[ item.angle ] ),
+      data: rotatedData.map( item => reference.means![ item.angle ] ),
       backgroundColor: Colors.REFERENCE_LIGHT,
       borderColor: Colors.REFERENCE_DARK,
     } as Chart.ChartDataSets );

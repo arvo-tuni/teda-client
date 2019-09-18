@@ -176,10 +176,7 @@ export default Vue.extend({
           return Data.fixations( this.trial );
         })
         .then( (fixations: GazeEvent.Fixation[]) => {
-          this.fixations = alignFixations(
-            fixations as GazeEvent.Fixation[],
-            this.events as WebLog.TestEvent[],
-          );
+          this.fixations = alignFixations( fixations, this.events! );
           return this.$nextTick();
         })
         .then( () => {

@@ -37,7 +37,7 @@ export default function userEvents(
   const datasets: Chart.ChartDataSets[] = [];
 
   let index = 0;
-  for (let key in events ) {
+  for (const key in events ) {
     const data = events[ key ] as TimedEvent[];
     if (!data || data.length === 0) {
       continue;
@@ -58,24 +58,24 @@ export default function userEvents(
     });
 
     index++;
-  };
+  }
 
   return new Chart( el, {
     type: 'scatter',
     data: {
-      labels: (datasets[0].data as Chart.ChartData[]).map( _ => '' ),
+      labels: (datasets[0].data as Chart.ChartPoint[]).map( _ => '' ),
       datasets,
     },
     options: {
       tooltips: {
         callbacks: {
           label: (tooltipItem, data) => {
-            const dataset = (data.datasets as Chart.ChartDataSets[])[ tooltipItem.datasetIndex || 0];
+            const dataset = data.datasets![ tooltipItem.datasetIndex || 0 ];
             const values = dataset.data as ChartDataExt[];
-            const { name, value } = values[ tooltipItem.index || 0];
+            const { name, value } = values[ tooltipItem.index || 0 ];
             const nameStr = name ? ` "${name}"` : '';
             const valStr = value !== undefined ? ` = [${value}]` : '';
-            return `${dataset.label}:${nameStr}${valStr}, ${secToTime( +(tooltipItem.label as string) )}`;
+            return `${dataset.label}:${nameStr}${valStr}, ${secToTime( +tooltipItem.label! )}`;
           },
         },
       },
@@ -91,7 +91,7 @@ export default function userEvents(
             min: 0.5,
             max: index + 0.5,
             stepSize: 1,
-            callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label as string : '',
+            callback: value => datasets[ value - 1 ] ? datasets[ value - 1 ].label! : '',
           },
         }],
       },

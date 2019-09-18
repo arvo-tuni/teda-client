@@ -179,7 +179,7 @@ export function chunks( allEvents: WebLog.TestEvent[], startTime: Date, endTime:
   });
 
   if (stimuliStart) {
-    result.push( new Chunk( (stimuliStart as Date).valueOf() - start, endTime.valueOf() - start, name ) );
+    result.push( new Chunk( stimuliStart!.valueOf() - start, endTime.valueOf() - start, name ) );
   }
 
   return result;

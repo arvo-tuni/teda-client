@@ -33,7 +33,7 @@ export default function saccadeAmplitudeTime(
       tooltips: {
         callbacks: {
           label: tooltipItem => {
-            return `average amplitude ${(+(tooltipItem.value as string)).toFixed( 1 )}\u00b0`;
+            return `average amplitude ${(+tooltipItem.value!).toFixed( 1 )}\u00b0`;
           },
         },
       },
