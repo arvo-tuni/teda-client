@@ -3,7 +3,7 @@
     template
       .field.has-addons.top-row(v-if="tests.length")
         p.control.is-expanded
-          list(prompt="Select a test" :items="tests" @changed="load")
+          list(prompt="Select a test" :items="tests" :selected="testName" @changed="load")
         p.control
           a.button.button-after-combo(@click="updateTasksList")
             span.icon
@@ -53,7 +53,7 @@ import VISUALIZATIONS from '@/core/visualizations';
 import { s } from '@/core/format';
 import { download } from '@/core/utils';
 
-import { UpdateInfo } from '@server/respTypes';
+import { UpdateInfo, Tests } from '@server/respTypes';
 
 
 interface CompData {
@@ -135,11 +135,17 @@ export default Vue.extend({
           }
           else {
             this.successMessage = 'No changes';
-            return Promise.resolve( this.tests );
+            return Promise.resolve({
+              names: this.tests,
+              current: this.testName,
+            } as Tests);
           }
         })
-        .then( (tests: string[]) => {
-          this.tests = tests;
+        .then( (tests: Tests) => {
+          this.tests = tests.names;
+          if (tests.current) {
+            this.testName = tests.current;
+          }
         })
         .catch( (err: Error) => {
           this.showError( new Error(
@@ -219,8 +225,11 @@ export default Vue.extend({
 
   mounted() {
     Data.tests()
-      .then( (tests: string[]) => {
-        this.tests = tests;
+      .then( (tests: Tests) => {
+        this.tests = tests.names;
+        if (tests.current) {
+          this.testName = tests.current;
+        }
       })
       .catch( (err: Error) => {
         this.showError( new Error(

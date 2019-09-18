@@ -2,7 +2,7 @@ import { ReferencedData as Statistics } from '@server/statistics/types';
 import * as WebLog from '@server/web/log';
 import { TrialMeta, TrialMetaExt } from '@server/web/meta';
 import * as GazeEvent from '@server/tobii/gaze-event';
-import { UpdateInfo } from '@server/respTypes';
+import { UpdateInfo, Tests } from '@server/respTypes';
 
 import { Chunk } from './transform';
 
@@ -51,7 +51,7 @@ export function load( name: string ): Promise<Error> {
   return put( `test/${name}` );
 }
 
-export function tests(): Promise<string[]> {
+export function tests(): Promise<Tests> {
   return get( 'tests' );
 }
 
