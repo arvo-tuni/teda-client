@@ -214,9 +214,7 @@ export default Vue.extend({
           this.createCharts();
         })
         .catch( (error: Error) => {
-          this.errorMessage = 'Cannot retrieve data: '
-            + (error ? error.message : 'unknown error')
-            + '. Close this message to try again';
+          this.errorMessage = 'Cannot retrieve data: ' + (error ? error.message : 'unknown error');
         });
     },
 

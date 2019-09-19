@@ -9,17 +9,30 @@ import { Chunk } from './transform';
 const cache: any = {};
 
 function request( method: string, path: string ): Promise<any> {
+
+  let status: number;
+  let statusText: string;
+
   return fetch( `http://localhost:3000/${path}`, {
     method,
     mode: 'cors',
     credentials: 'same-origin',
   })
   .then( res => {
-    if (res.status === 200) {
-      return res.json();
+    status = res.status;
+    statusText = res.statusText;
+    return res.json();
+  })
+  .then( json => {
+    if (status === 200) {
+      return Promise.resolve( json );
     }
     else {
-      return Promise.reject( new Error( `Request error for "${path}": ${res.statusText}` ) );
+      let error = statusText;
+      if (json && json.error) {
+        error = json.error;
+      }
+      return Promise.reject( new Error( `"${path}" returned "${error}" [${statusText}]` ) );
     }
   });
 }
@@ -47,12 +60,20 @@ function getCachedTrial( id: string, path: string ): Promise<any> {
   }
 }
 
+export function tests(): Promise<Tests> {
+  return get( 'tests' );
+}
+
+export function updateTestsList(): Promise<UpdateInfo> {
+  return get( 'tests/update' );
+}
+
 export function load( name: string ): Promise<Error> {
   return put( `test/${name}` );
 }
 
-export function tests(): Promise<Tests> {
-  return get( 'tests' );
+export function downloadStatistics( test: string ): Promise<string> {
+  return get( `test/${test}/stats` );
 }
 
 export function trials(): Promise<TrialMeta[]> {
@@ -97,14 +118,6 @@ export function stats( id: string ): Promise<Statistics> {
 
 export function chunkStats( id: string, chunk: Chunk ): Promise<Statistics> {
   return getCachedTrial( id, `stats/${chunk.start}-${chunk.end}` );
-}
-
-export function updateTasksList(): Promise<UpdateInfo> {
-  return get( 'stats/update' );
-}
-
-export function downloadStatistics( test: string ): Promise<string> {
-  return get( `test/${test}/stats` );
 }
 
 /* Left unused

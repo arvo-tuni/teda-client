@@ -5,14 +5,14 @@
         p.control.is-expanded
           list(prompt="Select a test" :items="tests" :selected="testName" @changed="load")
         p.control
-          a.button.button-after-combo(@click="updateTasksList")
+          a.button.button-after-combo(@click="updateTestsList")
             span.icon
               i.fas.fa-redo-alt
         p.control(v-if="!!testName")
           a.button.button-after-combo(@click="downloadStatistics")
             span.icon
               i.fas.fa-download
-      waiting(v-else is-modal=false is-bar=false)
+      waiting(v-else-if="!errorMessage" is-modal=false is-bar=false)
 
     .fixed-footer
       message(type="error" :message="errorMessage")
@@ -104,21 +104,25 @@ export default Vue.extend({
 
   methods: {
     showError( err: Error ) {
+      const isFetchSucceeded = err.message.endsWith(']');
+
       if (!err) {
         this.errorMessage = 'unknown error';
       }
       else {
-        this.errorMessage = err.message || JSON.stringify( err );
+        this.errorMessage =
+          (err.message || JSON.stringify( err )) +
+          (!isFetchSucceeded ? '. Is server running already?' : '');
       }
     },
 
-    updateTasksList() {
+    updateTestsList() {
       this.successMessage = '';
       this.errorMessage = '';
 
       this.isLoading = true;
 
-      Data.updateTasksList()
+      Data.updateTestsList()
         .then( (report: UpdateInfo) => {
           if (report.removed > 0 || report.appended > 0) {
             const msgs = [];
@@ -148,9 +152,7 @@ export default Vue.extend({
           }
         })
         .catch( (err: Error) => {
-          this.showError( new Error(
-            `Cannot retrieve the list of tests ("${err.message}"). Is server running already?`,
-          ));
+          this.showError( new Error( `Cannot update the list of tests: ${err.message}` ) );
         })
         .finally( () => {
           this.isLoading = false;
@@ -180,11 +182,11 @@ export default Vue.extend({
             return Promise.resolve();
           }
           else {
-            return Promise.reject();
+            return Promise.reject( respond );
           }
         })
         .catch( (err: Error) => {
-          this.showError( err );
+          this.showError( new Error( `Cannot load test trials: ${err.message}`) );
         })
         .finally( () => {
           this.isLoading = false;
@@ -218,7 +220,7 @@ export default Vue.extend({
           download( table, this.testName + '.csv' );
         })
         .catch( (err: Error) => {
-          this.showError( err );
+          this.showError( new Error( `Cannot download the statistics: ${err.message}` ) );
         });
     },
   },
@@ -232,9 +234,7 @@ export default Vue.extend({
         }
       })
       .catch( (err: Error) => {
-        this.showError( new Error(
-          `Cannot retrieve the list of tests ("${err.message}"). Is server running already?`,
-        ));
+        this.showError( new Error( `Cannot retrieve the list of tests: ${err.message}` ) );
       });
   },
 });
