@@ -38,7 +38,7 @@ export default function userEvents(
 
   let index = 0;
   for (const key in events ) {
-    const data = events[ key ] as TimedEvent[];
+    const data = events[ key ];
     if (!data || data.length === 0) {
       continue;
     }

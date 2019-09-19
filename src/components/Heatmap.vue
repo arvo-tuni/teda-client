@@ -144,12 +144,12 @@ export default Vue.extend({
       return '{value} px/sec';
     },
 
-    intensityFormatter(): any {
+    intensityFormatter() {
       return (value: number) => (value / 1000).toFixed( 2 );
     },
 
-    timeRangeFormatter(): any {
-      return (value: number)  => secToTime( value );
+    timeRangeFormatter() {
+      return (value: number) => secToTime( value );
     },
 
     canvasParentWidth(): number {

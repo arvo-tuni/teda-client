@@ -19,7 +19,7 @@ import Vue from 'vue';
 import VISUALIZATIONS from '@/core/visualizations';
 
 interface CompData {
-  tabs: any;
+  tabs: {[x: string]: string};
 }
 
 /// Emits:

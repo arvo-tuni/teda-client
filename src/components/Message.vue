@@ -12,7 +12,7 @@ const AUTO_HIDE_INTERVAL = 3000; // ms
 
 interface CompData {
   enabled: boolean;
-  timer: any;
+  timer: number | null;
 }
 
 /// Emits:

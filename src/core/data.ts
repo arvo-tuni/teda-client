@@ -6,7 +6,7 @@ import { UpdateInfo, Tests } from '@server/respTypes';
 
 import { Chunk } from './transform';
 
-const cache: any = {};
+const cache: {[x: string]: {[y: string]: any}} = {};
 
 function request( method: string, path: string ): Promise<any> {
 

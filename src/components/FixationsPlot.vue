@@ -153,8 +153,8 @@ export default Vue.extend({
       return '{value} px/sec';
     },
 
-    timeRangeFormatter(): any {
-      return (value: number)  => secToTime( value );
+    timeRangeFormatter() {
+      return (value: number) => secToTime( value );
     },
   },
 

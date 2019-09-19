@@ -62,7 +62,7 @@ interface CompData {
   errorMessage: string;
   successMessage: string;
   isLoading: boolean;
-  visualizations: any;
+  visualizations: {[x: string]: string};
 }
 
 export default Vue.extend({

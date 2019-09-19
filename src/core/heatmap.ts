@@ -2,7 +2,28 @@ import { Fixation } from '@server/statistics/types';
 
 import * as WebLog from '@server/web/log';
 
-declare function createWebGLHeatmap( options: any ): any;
+// WebGLHeatmap types
+
+interface IHeatmapOptions {
+  canvas?: HTMLCanvasElement;
+  width?: number;
+  height?: number;
+  intensityToAlpha?: boolean;
+  gradientTexture?: string | HTMLImageElement;
+  alphaRange?: number[];
+}
+
+interface IHeatmap {
+  clear(): void;
+  adjustSize(): void;
+  addPoint( x: number, y: number, radius: number, intensity: number ): void;
+  update(): void;
+  display(): void;
+}
+
+declare function createWebGLHeatmap( options: IHeatmapOptions ): IHeatmap;
+
+// /WebGLHeatmap
 
 const AREA_EXTENSION = 100;
 
@@ -14,7 +35,7 @@ export interface HeatmapOptions {
 
 export class Heatmap {
   private canvas: HTMLCanvasElement;
-  private heatmap: any;
+  private heatmap: IHeatmap;
   private scaleX: number;
   private scaleY: number;
   private offsetX: number;
