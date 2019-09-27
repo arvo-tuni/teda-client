@@ -12,7 +12,14 @@
           a.button.button-after-combo(@click="downloadStatistics")
             span.icon
               i.fas.fa-download
-      waiting(v-else-if="!errorMessage" is-modal=false is-bar=false)
+      waiting(v-else-if="isLoadingTestList" is-modal=false is-bar=false)
+      .field(v-else-if="tests.length === 0")
+        .content.has-text-centered
+          strong No data
+        .content.has-text-centered
+          a.button.button-after-combo(@click="updateTestsList")
+            span.icon
+              i.fas.fa-redo-alt
 
     .fixed-footer
       message(type="error" :message="errorMessage")
@@ -62,6 +69,7 @@ interface CompData {
   errorMessage: string;
   successMessage: string;
   isLoading: boolean;
+  isLoadingTestList: boolean;
   visualizations: {[x: string]: string};
 }
 
@@ -88,6 +96,7 @@ export default Vue.extend({
       errorMessage: '',
       successMessage: '',
       isLoading: false,
+      isLoadingTestList: false,
       visualizations: VISUALIZATIONS,
     } as CompData;
   },
@@ -226,6 +235,8 @@ export default Vue.extend({
   },
 
   mounted() {
+    this.isLoadingTestList = true;
+
     Data.tests()
       .then( (tests: Tests) => {
         this.tests = tests.names;
@@ -235,6 +246,9 @@ export default Vue.extend({
       })
       .catch( (err: Error) => {
         this.showError( new Error( `Cannot retrieve the list of tests: ${err.message}` ) );
+      })
+      .finally( () => {
+        this.isLoadingTestList = false;
       });
   },
 });
