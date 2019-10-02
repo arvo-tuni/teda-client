@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import VueStorage from 'vue-ls';
+import { VueStorage, Options as VueStorageOptions } from 'vue-ls';
 
 import App from './App.vue';
 import router from './router';
@@ -13,7 +13,7 @@ const storageOptions = {
   namespace: 'arvo__',
   name: 'ls',
   storage: 'local',   // storage name: session, local, memory
-};
+} as VueStorageOptions;
 
 Vue.use( VueStorage, storageOptions );
 
