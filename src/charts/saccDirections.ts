@@ -77,7 +77,7 @@ export default function saccadeDirections(
       },
       legend: {
         labels: {
-          filter: item => item.hidden = item.datasetIndex <= 2,
+          filter: item => item.hidden = item.datasetIndex as number <= 2,
         },
       },
     },
