@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { VueStorage, Options as VueStorageOptions } from 'vue-ls';
+import VueStoragePlugin, * as VueStorage from 'vue-ls';
 
 import App from './App.vue';
 import router from './router';
@@ -13,9 +13,9 @@ const storageOptions = {
   namespace: 'arvo__',
   name: 'ls',
   storage: 'local',   // storage name: session, local, memory
-} as VueStorageOptions;
+} as VueStorage.Options;
 
-Vue.use( VueStorage, storageOptions );
+Vue.use( VueStoragePlugin, storageOptions );
 
 Vue.config.productionTip = false;
 
