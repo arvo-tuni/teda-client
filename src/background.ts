@@ -1,10 +1,10 @@
 'use strict';
 
-// import path from 'path';
 import { app, protocol, shell, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
 import { createProtocol /*, installVueDevtools*/} from 'vue-cli-plugin-electron-builder/lib';
 
-import '../../teda-server/build/app';
+// import '../../teda-server/build/app';
+import '../../teda-server/src/app';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
