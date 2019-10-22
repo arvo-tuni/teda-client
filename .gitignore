@@ -24,4 +24,4 @@ yarn-error.log*
 /dist_electron
 
 # Custom
-arvo.json
+eakr.json

@@ -101,7 +101,7 @@ function createMenu() {
 
 createMenu();
 
-app.setName( 'ARVO gaze data visualization' );
+app.setName( 'EAKR gaze data visualization' );
 
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
