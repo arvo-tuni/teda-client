@@ -33,7 +33,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 ## Building a stand-alone app with ElectronJS
 
 **IMPORTANT!**
-The stand-alone build depends on the [server-side code](https://github.com/arvo-tuni/teda-server): please clone it so that both `teda-client` and `teda-server` projects are located in the same folder. After cloning the `teda-server` project, install its dependencies (`npm install`).
+The stand-alone build depends on the [server-side code](https://github.com/tuni-eakr/teda-server): please clone it so that both `teda-client` and `teda-server` projects are located in the same folder. After cloning the `teda-server` project, install its dependencies (`npm install`).
 
 ### Compiles and hot-reloads for development
 ```
