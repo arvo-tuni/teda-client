@@ -30,7 +30,7 @@
     "@vue/cli-plugin-babel": "^3.9.0",
     "@vue/cli-plugin-typescript": "^3.9.0",
     "@vue/cli-service": "^3.9.0",
-    "electron": "^6.0.0",
+    "electron": "^9.1.0",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
     "typescript": "^3.4.3",
